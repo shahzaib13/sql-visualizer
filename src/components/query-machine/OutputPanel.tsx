@@ -6,6 +6,7 @@ import { ArrowRight, Eye, Heart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { POSTS } from "@/lib/data";
 import { classify, STAGES, type RowKind } from "@/lib/queryEngine";
+import { Term } from "@/components/ui/Term";
 import { cn } from "@/lib/utils";
 import { useQueryStore, type OutputFilter } from "@/store/useQueryStore";
 
@@ -125,6 +126,68 @@ function OutputRow({ id }: { id: number }) {
   );
 }
 
+const SCHEMA = [
+  { name: "id", type: "number", note: "row number" },
+  { name: "username", type: "text", note: "who posted" },
+  { name: "format", type: "text", note: "image or video" },
+  { name: "likes_count", type: "number", note: "how many likes" },
+  { name: "views_count", type: "number", note: "how many views" },
+] as const;
+
+function SourceTable() {
+  return (
+    <div>
+      <div className="rounded-xl border border-border bg-panel p-3 shadow-[var(--shadow-row)]">
+        <p className="mb-2 text-[11px] leading-relaxed text-text-muted">
+          This is <b className="text-text">posts</b> — the table every query on this level reads from.
+          Nothing here has been touched yet; it&apos;s the same {POSTS.length} rows every time.
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {SCHEMA.map((col) => (
+            <span
+              key={col.name}
+              title={col.note}
+              className="cursor-help rounded-full border border-border bg-panel-2 px-2 py-0.5 font-mono text-[10px] text-text-muted"
+            >
+              {col.name} <span className="opacity-60">· {col.type}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+        <span className="w-5 flex-none">id</span>
+        <span className="min-w-0 flex-1">user</span>
+        <span className="w-[46px] flex-none">format</span>
+        <span className="w-[38px] flex-none">likes</span>
+        <span className="w-[42px] flex-none">views</span>
+      </div>
+      <div className="mt-1.5 flex flex-col gap-2">
+        {POSTS.map((row) => (
+          <div
+            key={row.id}
+            className="flex items-center gap-2.5 rounded-md border border-border bg-panel px-2.5 py-2 shadow-[var(--shadow-row)]"
+          >
+            <span className="w-5 flex-none font-mono text-[10px] text-text-muted">
+              {String(row.id).padStart(2, "0")}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold">{row.username}</span>
+            <span className="w-[46px] flex-none font-mono text-[10.5px] text-text-muted">{row.format}</span>
+            <span className="flex w-[38px] flex-none items-center gap-1 font-mono text-[11px] text-bad">
+              <Heart className="h-2.5 w-2.5" fill="currentColor" strokeWidth={0} />
+              {row.likes_count}
+            </span>
+            <span className="flex w-[42px] flex-none items-center gap-1 font-mono text-[11px] text-flow">
+              <Eye className="h-2.5 w-2.5" />
+              {row.views_count}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function OutputPanel() {
   const stage = useQueryStore((s) => s.stage);
   const threshold = useQueryStore((s) => s.threshold);
@@ -148,9 +211,30 @@ export function OutputPanel() {
     .map(([id]) => id);
 
   const bigCount = filter === "all" ? 8 : filter === "included" ? includedCount : filter === "excluded" ? excludedCount : cutCount;
+  const [view, setView] = useState<"input" | "output">("output");
 
   return (
     <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
+      <div className="mb-3.5 flex gap-0.5 rounded-lg border border-border bg-panel p-[3px]">
+        {(["input", "output"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={cn(
+              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold capitalize transition-colors",
+              view === v ? "bg-accent text-accent-ink" : "text-text-muted hover:text-text",
+            )}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
+
+      {view === "input" ? (
+        <SourceTable />
+      ) : (
+        <>
       <Tabs.Root value={filter} onValueChange={(v) => setFilter(v as OutputFilter)}>
         <Tabs.List className="relative flex gap-0.5 rounded-lg border border-border bg-panel p-[3px] shadow-[var(--shadow)]">
           <motion.span
@@ -183,7 +267,22 @@ export function OutputPanel() {
         </span>
       </div>
 
-      <div className="mt-3.5 flex flex-col gap-2">
+      {visibleIds.length > 0 && (
+        <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+          <span className="w-5 flex-none">id</span>
+          <span className="min-w-0 flex-1">user</span>
+          <span className="flex flex-none gap-2.5">
+            <span className="flex items-center gap-1 w-[38px]">
+              <Term term="likes_count">likes</Term>
+            </span>
+            <span className="flex items-center gap-1 w-[42px]">
+              <Term term="views_count">views</Term>
+            </span>
+          </span>
+          <span className="w-[62px] flex-none">status</span>
+        </div>
+      )}
+      <div className="mt-1.5 flex flex-col gap-2">
         <AnimatePresence mode="popLayout">
           {visibleIds.map((id) => (
             <OutputRow key={id} id={id} />
@@ -195,6 +294,8 @@ export function OutputPanel() {
         <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
           No rows in this view yet — drag the pipeline slider.
         </p>
+      )}
+        </>
       )}
 
       {stage < STAGES.length - 1 && (

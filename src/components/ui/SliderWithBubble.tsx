@@ -43,7 +43,9 @@ export function SliderWithBubble({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 500, damping: 32 }}
-            style={{ left: `${pct}%` }}
+            // Thumb is 16px wide, so its center drifts 8px inside the track at
+            // the ends — raw `${pct}%` alone puts the bubble off-thumb there.
+            style={{ left: `calc(${pct}% + ${8 - pct * 0.16}px)` }}
             className="absolute top-0 -translate-x-1/2 whitespace-nowrap rounded-md bg-accent px-2 py-0.5 font-mono text-[10px] font-bold text-accent-ink shadow-[var(--shadow)]"
           >
             {formatBubble(value)}

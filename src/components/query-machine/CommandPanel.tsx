@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import { Minus, Pause, Play, Plus, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ORDERABLE_COLUMNS, TOGGLE_COLUMNS } from "@/lib/data";
+import { GLOSSARY } from "@/lib/glossary";
 import { passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
 import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
+import { Term } from "@/components/ui/Term";
 
 const CLAUSE_ORDER = ["SELECT", "FROM", "WHERE", "ORDER BY", "LIMIT"] as const;
 const EXEC_NO: Record<string, number> = { SELECT: 3, FROM: 1, WHERE: 2, "ORDER BY": 4, LIMIT: 5 };
@@ -80,31 +82,45 @@ function SqlBlock() {
   const parts: Record<string, React.ReactNode> = {
     SELECT: (
       <>
-        <span className="font-bold text-code-kw">SELECT</span>
-        <sup>{EXEC_NO.SELECT}</sup> <span className="text-code-val">{selectColsText(selectedCols)}</span>
+        <Term term="SELECT" className="font-bold text-code-kw">
+          SELECT
+        </Term>
+        <sup>{EXEC_NO.SELECT}</sup>{" "}
+        <span className="text-code-val">{selectColsText(selectedCols)}</span>
       </>
     ),
     FROM: (
       <>
-        <span className="font-bold text-code-kw">FROM</span>
+        <Term term="FROM" className="font-bold text-code-kw">
+          FROM
+        </Term>
         <sup>{EXEC_NO.FROM}</sup> posts
       </>
     ),
     WHERE: (
       <>
-        <span className="font-bold text-code-kw">WHERE</span>
-        <sup>{EXEC_NO.WHERE}</sup> likes_count &gt; <span className="text-code-num">{threshold}</span>
+        <Term term="WHERE" className="font-bold text-code-kw">
+          WHERE
+        </Term>
+        <sup>{EXEC_NO.WHERE}</sup>{" "}
+        <Term term="likes_count">likes_count</Term> &gt;{" "}
+        <span className="text-code-num">{threshold}</span>
       </>
     ),
     "ORDER BY": (
       <>
-        <span className="font-bold text-code-kw">ORDER BY</span>
-        <sup>{EXEC_NO["ORDER BY"]}</sup> {orderCol} {orderDir}
+        <Term term="ORDER BY" className="font-bold text-code-kw">
+          ORDER BY
+        </Term>
+        <sup>{EXEC_NO["ORDER BY"]}</sup> <Term term={orderCol}>{orderCol}</Term>{" "}
+        <Term term={orderDir}>{orderDir}</Term>
       </>
     ),
     LIMIT: (
       <>
-        <span className="font-bold text-code-kw">LIMIT</span>
+        <Term term="LIMIT" className="font-bold text-code-kw">
+          LIMIT
+        </Term>
         <sup>{EXEC_NO.LIMIT}</sup> <span className="text-code-num">{limit}</span>
       </>
     ),
@@ -211,7 +227,7 @@ function ThresholdCard() {
     <div className="rounded-xl border border-border bg-panel-2 p-3.5">
       <label className="mb-1 flex items-center justify-between gap-1.5 text-[11px] font-semibold tracking-wide text-text-muted">
         <span>
-          WHERE likes_count &gt;{" "}
+          <Term term="WHERE">WHERE</Term> <Term term="likes_count">likes_count</Term> &gt;{" "}
           <span className="font-mono text-accent">
             <motion.span
               key={threshold}
@@ -247,7 +263,9 @@ function SelectColumnsCard() {
 
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5">
-      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">SELECT columns</label>
+      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">
+        <Term term="SELECT">SELECT</Term> columns
+      </label>
       <div className="flex flex-wrap gap-1.5">
         {TOGGLE_COLUMNS.map((c) => {
           const on = selectedCols.includes(c.key);
@@ -281,7 +299,9 @@ function OrderByCard() {
 
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5">
-      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">ORDER BY</label>
+      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">
+        <Term term="ORDER BY">ORDER BY</Term>
+      </label>
       <div className="flex flex-wrap gap-1.5">
         {ORDERABLE_COLUMNS.map((c) => (
           <button
@@ -301,6 +321,7 @@ function OrderByCard() {
         type="button"
         onClick={toggleOrderDir}
         className="mt-2 flex w-fit items-center gap-1 rounded-md border border-border bg-panel px-2 py-1 font-mono text-[11px] font-bold text-text hover:border-accent"
+        title={orderDir === "DESC" ? GLOSSARY.DESC : GLOSSARY.ASC}
       >
         {orderDir}
         <motion.svg
@@ -326,7 +347,9 @@ function LimitCard() {
 
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5">
-      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">LIMIT</label>
+      <label className="mb-2 text-[11px] font-semibold tracking-wide text-text-muted">
+        <Term term="LIMIT">LIMIT</Term>
+      </label>
       <div className="flex items-center gap-2.5">
         <button
           type="button"
