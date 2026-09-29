@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { aggLabel } from "@/lib/groupByEngine";
-import { evaluateHaving } from "@/lib/havingEngine";
+import { evaluateHaving, HV_STAGES } from "@/lib/havingEngine";
 import { useHavingStore } from "@/store/useHavingStore";
 import { BUCKET_COLORS } from "../shared/RowChip";
 
@@ -13,6 +14,7 @@ export function HavingOutputPanel() {
   const aggFn = useHavingStore((s) => s.aggFn);
   const havingOp = useHavingStore((s) => s.havingOp);
   const havingValue = useHavingStore((s) => s.havingValue);
+  const setStage = useHavingStore((s) => s.setStage);
   const selected = stage >= 3;
 
   const results = evaluateHaving(groupCol, metricCol, aggFn, havingOp, havingValue);
@@ -63,6 +65,17 @@ export function HavingOutputPanel() {
             </p>
           )}
         </div>
+      )}
+
+      {stage < HV_STAGES.length - 1 && (
+        <button
+          type="button"
+          onClick={() => setStage(stage + 1)}
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
+        >
+          Advance to {HV_STAGES[stage + 1]}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );

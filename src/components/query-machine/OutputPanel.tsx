@@ -2,10 +2,10 @@
 
 import * as Tabs from "@radix-ui/react-tabs";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, Heart } from "lucide-react";
+import { ArrowRight, Eye, Heart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { POSTS } from "@/lib/data";
-import { classify, type RowKind } from "@/lib/queryEngine";
+import { classify, STAGES, type RowKind } from "@/lib/queryEngine";
 import { cn } from "@/lib/utils";
 import { useQueryStore, type OutputFilter } from "@/store/useQueryStore";
 
@@ -133,6 +133,7 @@ export function OutputPanel() {
   const limit = useQueryStore((s) => s.limit);
   const filter = useQueryStore((s) => s.filter);
   const setFilter = useQueryStore((s) => s.setFilter);
+  const setStage = useQueryStore((s) => s.setStage);
   const { refs, style } = useFilterIndicator(filter);
 
   const { byId, includedCount, excludedCount, cutCount } = classify({ stage, threshold, orderCol, orderDir, limit });
@@ -194,6 +195,17 @@ export function OutputPanel() {
         <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
           No rows in this view yet — drag the pipeline slider.
         </p>
+      )}
+
+      {stage < STAGES.length - 1 && (
+        <button
+          type="button"
+          onClick={() => setStage(stage + 1)}
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
+        >
+          Advance to {STAGES[stage + 1]}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );

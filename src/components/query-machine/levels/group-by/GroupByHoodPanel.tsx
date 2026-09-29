@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { Check } from "lucide-react";
 import { aggLabel, GB_STAGES, groupRows } from "@/lib/groupByEngine";
 import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
@@ -26,9 +27,15 @@ export function GroupByHoodPanel() {
     <div className="flex h-full flex-col">
       <div className="flex flex-none items-center justify-between gap-2.5 border-b border-border px-4 py-2.5">
         <h2 className="text-[12.5px] font-bold tracking-wide text-text-muted uppercase">Under the hood</h2>
-        <span className="font-mono text-[11px] text-text-muted">{GB_STAGES[stage]}</span>
+        <span className="font-mono text-[11px] text-text-muted">
+          Phase {stage + 1}/{GB_STAGES.length} · {GB_STAGES[stage]}
+        </span>
       </div>
       <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
+        <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
+          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          Query parsed — 3 clauses recognised
+        </div>
         <motion.p
           key={caption}
           initial={{ opacity: 0, y: 4 }}

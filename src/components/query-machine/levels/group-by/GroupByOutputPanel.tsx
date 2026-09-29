@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { aggLabel, groupRows } from "@/lib/groupByEngine";
+import { ArrowRight } from "lucide-react";
+import { aggLabel, GB_STAGES, groupRows } from "@/lib/groupByEngine";
 import { useGroupByStore } from "@/store/useGroupByStore";
 
 const BUCKET_COLORS = ["var(--accent)", "var(--flow)", "var(--ok)", "var(--warn)", "var(--bad)"];
@@ -11,6 +12,7 @@ export function GroupByOutputPanel() {
   const groupCol = useGroupByStore((s) => s.groupCol);
   const metricCol = useGroupByStore((s) => s.metricCol);
   const aggFn = useGroupByStore((s) => s.aggFn);
+  const setStage = useGroupByStore((s) => s.setStage);
   const computed = stage >= 2;
   const groups = groupRows(groupCol, metricCol, aggFn);
 
@@ -54,6 +56,17 @@ export function GroupByOutputPanel() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {stage < GB_STAGES.length - 1 && (
+        <button
+          type="button"
+          onClick={() => setStage(stage + 1)}
+          className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
+        >
+          Advance to {GB_STAGES[stage + 1]}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );
