@@ -2,6 +2,7 @@
 
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useEffect } from "react";
+import { applyShareUrlIfPresent } from "@/lib/shareLink";
 import { useAppStore } from "@/store/useAppStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { GroupByView } from "./levels/GroupByView";
@@ -15,6 +16,10 @@ import { TopBar } from "./TopBar";
 export function QueryMachine() {
   const currentLevel = useAppStore((s) => s.currentLevel);
   const markVisited = useProgressStore((s) => s.markVisited);
+
+  useEffect(() => {
+    applyShareUrlIfPresent();
+  }, []);
 
   useEffect(() => {
     markVisited(currentLevel);

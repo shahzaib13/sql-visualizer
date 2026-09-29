@@ -2,8 +2,9 @@
 
 import * as Switch from "@radix-ui/react-switch";
 import { motion } from "framer-motion";
-import { Check, Cog, Moon, Sun } from "lucide-react";
+import { Check, Cog, Link2, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { buildShareUrl } from "@/lib/shareLink";
 import { cn } from "@/lib/utils";
 import { LEVELS, useAppStore } from "@/store/useAppStore";
 import { useProgressStore } from "@/store/useProgressStore";
@@ -105,6 +106,36 @@ function ProgressDots() {
   );
 }
 
+function ShareButton() {
+  const [copied, setCopied] = useState(false);
+
+  const handleClick = async () => {
+    const url = buildShareUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt("Copy this link:", url);
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      title="Copy a link to this exact state — level, stage, and every control"
+      className="flex items-center gap-1.5 rounded-md border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] font-semibold text-text-muted transition-colors hover:border-accent hover:text-text"
+    >
+      <Link2 className="h-3.5 w-3.5" />
+      <motion.span key={copied ? "copied" : "share"} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}>
+        {copied ? "Copied!" : "Share"}
+      </motion.span>
+    </button>
+  );
+}
+
 export function TopBar() {
   const hoodOpen = useAppStore((s) => s.hoodOpen);
   const toggleHood = useAppStore((s) => s.toggleHood);
@@ -127,6 +158,8 @@ export function TopBar() {
 
       <div className="flex flex-wrap items-center gap-3.5">
         <LevelNav />
+
+        <ShareButton />
 
         <button
           type="button"
