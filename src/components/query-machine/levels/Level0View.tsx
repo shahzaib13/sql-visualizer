@@ -1,6 +1,6 @@
 import { ResizableShell, SectionHeader } from "../ResizableShell";
 import { CommandPanel } from "../CommandPanel";
-import { HoodPanel } from "../HoodPanel";
+import { PipelineHoodPanel } from "./filter/PipelineHoodPanel";
 import { OutputPanel } from "../OutputPanel";
 
 export function Level0View() {
@@ -13,7 +13,7 @@ export function Level0View() {
           <CommandPanel />
         </>
       }
-      hood={<HoodPanel />}
+      hood={<PipelineHoodPanel />}
       output={
         <>
           <SectionHeader title="Output" hint="updates live" />

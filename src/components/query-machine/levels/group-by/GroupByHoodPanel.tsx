@@ -4,25 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { aggLabel, GB_STAGES, groupRows } from "@/lib/groupByEngine";
 import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
-import type { PostRow } from "@/lib/data";
 import { POSTS } from "@/lib/data";
-
-const BUCKET_COLORS = ["var(--accent)", "var(--flow)", "var(--ok)", "var(--warn)", "var(--bad)"];
-
-function RowChip({ row, dimmed }: { row: PostRow; dimmed: boolean }) {
-  return (
-    <motion.div
-      layoutId={`gb-row-${row.id}`}
-      layout
-      transition={{ type: "spring", stiffness: 380, damping: 32 }}
-      animate={{ opacity: dimmed ? 0.55 : 1, scale: dimmed ? 0.92 : 1 }}
-      className="flex flex-none items-center gap-1.5 rounded-full border border-border bg-panel px-2.5 py-1 font-mono text-[10.5px] font-semibold shadow-[var(--shadow-row)]"
-    >
-      <span className="text-text-muted">#{row.id}</span>
-      {row.username}
-    </motion.div>
-  );
-}
+import { BUCKET_COLORS, RowChip } from "../shared/RowChip";
 
 export function GroupByHoodPanel() {
   const stage = useGroupByStore((s) => s.stage);

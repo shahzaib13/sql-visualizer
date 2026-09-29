@@ -1,0 +1,283 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, Check, Table2, X } from "lucide-react";
+import { classify, passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
+import { cn } from "@/lib/utils";
+import { useQueryStore } from "@/store/useQueryStore";
+
+function Connector({ flowing }: { flowing: boolean }) {
+  return (
+    <div className="relative ml-[15px] h-6 w-px flex-none overflow-hidden">
+      <div className={cn("absolute inset-0", flowing ? "bg-flow" : "bg-border")} />
+      {flowing && (
+        <motion.div
+          className="absolute inset-x-0 h-3 bg-gradient-to-b from-transparent via-accent to-transparent"
+          animate={{ y: ["-16px", "24px"] }}
+          transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+        />
+      )}
+    </div>
+  );
+}
+
+function StatCard({
+  tone,
+  value,
+  label,
+  icon,
+}: {
+  tone: "ok" | "bad" | "neutral";
+  value: number;
+  label: string;
+  icon?: React.ReactNode;
+}) {
+  const toneClasses = {
+    ok: "border-ok/40 bg-ok/10 text-ok",
+    bad: "border-bad/40 bg-bad/10 text-bad",
+    neutral: "border-border bg-panel text-text-muted",
+  }[tone];
+
+  return (
+    <div className={cn("flex flex-1 items-center gap-2 rounded-lg border px-3 py-2", toneClasses)}>
+      {icon}
+      <div>
+        <div className="font-mono text-[15px] font-bold leading-none">{value}</div>
+        <div className="mt-1 text-[9.5px] leading-none opacity-80">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function NodeShell({
+  index,
+  active,
+  reached,
+  onClick,
+  children,
+}: {
+  index: number;
+  active: boolean;
+  reached: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="flex flex-none flex-col items-center pt-0.5">
+        <motion.button
+          type="button"
+          onClick={onClick}
+          animate={{
+            backgroundColor: active ? "var(--accent)" : reached ? "var(--flow)" : "var(--panel-2)",
+            borderColor: active ? "var(--accent)" : reached ? "var(--flow)" : "var(--border)",
+            color: active || reached ? "#fff" : "var(--text-muted)",
+          }}
+          className="grid h-8 w-8 flex-none place-items-center rounded-full border-2 font-mono text-[11px] font-bold"
+        >
+          {index}
+        </motion.button>
+      </div>
+      <motion.div
+        layout
+        animate={{
+          borderColor: active ? "var(--accent)" : "var(--border)",
+          boxShadow: active ? "0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent)" : "none",
+        }}
+        className="mb-1 flex-1 rounded-xl border bg-panel p-3.5 shadow-[var(--shadow-row)]"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+function Badge({ tone = "neutral", children }: { tone?: "accent" | "ok" | "warn" | "neutral"; children: React.ReactNode }) {
+  const toneClasses = {
+    accent: "bg-accent text-accent-ink",
+    ok: "bg-ok text-white",
+    warn: "bg-warn text-white",
+    neutral: "border border-border text-text-muted",
+  }[tone];
+  return (
+    <span className={cn("rounded-full px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap", toneClasses)}>
+      {children}
+    </span>
+  );
+}
+
+export function PipelineHoodPanel() {
+  const stage = useQueryStore((s) => s.stage);
+  const threshold = useQueryStore((s) => s.threshold);
+  const selectedCols = useQueryStore((s) => s.selectedCols);
+  const orderCol = useQueryStore((s) => s.orderCol);
+  const orderDir = useQueryStore((s) => s.orderDir);
+  const limit = useQueryStore((s) => s.limit);
+  const simIndex = useQueryStore((s) => s.simIndex);
+  const setSimIndex = useQueryStore((s) => s.setSimIndex);
+  const setStage = useQueryStore((s) => s.setStage);
+
+  const total = 8;
+  const cls = classify({ stage, threshold, orderCol, orderDir, limit });
+  const passing = passingCount(threshold);
+  const dropped = total - passing;
+  const kept = Math.min(limit, passing);
+  const cut = Math.max(0, passing - limit);
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex flex-none items-center justify-between gap-2.5 border-b border-border px-4 py-2.5">
+        <h2 className="text-[12.5px] font-bold tracking-wide text-text-muted uppercase">Under the hood</h2>
+        <span className="font-mono text-[11px] text-text-muted">
+          Phase {stage + 1}/{STAGES.length} · {STAGES[stage]}
+        </span>
+      </div>
+
+      <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
+        <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
+          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          Query parsed — 5 clauses recognised
+        </div>
+
+        {/* FROM */}
+        <NodeShell index={1} active={stage === 0} reached={stage >= 0} onClick={() => setStage(0)}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 font-mono text-[12.5px] font-bold">
+              <Table2 className="h-3.5 w-3.5 text-text-muted" />
+              FROM posts
+            </span>
+            <Badge tone="neutral">Base table</Badge>
+          </div>
+          <p className="mt-1.5 text-[10.5px] text-text-muted">Memory page scan — {total} rows read</p>
+        </NodeShell>
+
+        <Connector flowing={stage >= 1} />
+
+        {/* WHERE — the rich node */}
+        <NodeShell index={2} active={stage === 1} reached={stage >= 1} onClick={() => setStage(1)}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono text-[12.5px] font-bold">
+              WHERE likes_count &gt; <span className="text-accent">{threshold}</span>
+            </span>
+            {stage === 1 && <Badge tone="warn">Active bottleneck</Badge>}
+          </div>
+
+          <AnimatePresence>
+            {stage >= 1 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 flex gap-2">
+                  <StatCard tone="ok" value={passing} label="pass → engine" icon={<ArrowRight className="h-3.5 w-3.5" />} />
+                  <StatCard tone="bad" value={dropped} label="discarded" icon={<X className="h-3.5 w-3.5" />} />
+                </div>
+
+                <div className="mt-3 rounded-lg border border-border bg-panel-2 p-2.5">
+                  <p className="mb-2 text-[10px] font-bold tracking-wide text-text-muted uppercase">Access plan</p>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSimIndex(false)}
+                      className={cn(
+                        "flex-1 rounded-md border px-2 py-1.5 font-mono text-[10.5px] font-semibold transition-colors",
+                        !simIndex ? "border-flow bg-flow/15 text-flow" : "border-border text-text-muted",
+                      )}
+                    >
+                      Full table scan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSimIndex(true)}
+                      className={cn(
+                        "flex-1 rounded-md border px-2 py-1.5 font-mono text-[10.5px] font-semibold transition-colors",
+                        simIndex ? "border-ok bg-ok/15 text-ok" : "border-border text-text-muted",
+                      )}
+                    >
+                      Index seek (likes_count)
+                    </button>
+                  </div>
+                  <p className="mt-2 text-[10px] leading-snug text-text-muted">
+                    {simIndex
+                      ? `The index jumps straight to matches — only ${passing} of ${total} pages ever get opened.`
+                      : `No index exists, so every page is opened and checked — all ${total} pages, even the ${dropped} that fail.`}
+                  </p>
+                </div>
+
+                <div className="mt-2.5 flex flex-wrap gap-1">
+                  {Array.from({ length: total }).map((_, i) => {
+                    const id = i + 1;
+                    const row = cls.byId.get(id);
+                    const isPass = row?.kind !== "excluded";
+                    const skipped = simIndex && !isPass;
+                    return (
+                      <span
+                        key={id}
+                        title={`P${id}`}
+                        className={cn(
+                          "grid h-6 w-6 place-items-center rounded border font-mono text-[8px] font-bold",
+                          skipped
+                            ? "border-dashed border-border text-text-muted opacity-40"
+                            : isPass
+                              ? "border-ok/50 bg-ok/15 text-ok"
+                              : "border-bad/50 bg-bad/10 text-bad",
+                        )}
+                      >
+                        {id}
+                      </span>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {stage < 1 && <p className="mt-1.5 text-[10.5px] text-text-muted">Not reached yet.</p>}
+        </NodeShell>
+
+        <Connector flowing={stage >= 2} />
+
+        {/* SELECT */}
+        <NodeShell index={3} active={stage === 2} reached={stage >= 2} onClick={() => setStage(2)}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono text-[12.5px] font-bold">SELECT {selectColsText(selectedCols)}</span>
+            <Badge tone="neutral">{selectedCols.length + 1} cols</Badge>
+          </div>
+          <p className="mt-1.5 text-[10.5px] text-text-muted">Pruning to only the requested columns.</p>
+        </NodeShell>
+
+        <Connector flowing={stage >= 3} />
+
+        {/* ORDER BY */}
+        <NodeShell index={4} active={stage === 3} reached={stage >= 3} onClick={() => setStage(3)}>
+          <span className="font-mono text-[12.5px] font-bold">
+            ORDER BY {orderCol} {orderDir}
+          </span>
+          <p className="mt-1.5 text-[10.5px] text-text-muted">Sorting the surviving rows in memory.</p>
+        </NodeShell>
+
+        <Connector flowing={stage >= 4} />
+
+        {/* LIMIT */}
+        <NodeShell index={5} active={stage === 4} reached={stage >= 4} onClick={() => setStage(4)}>
+          <span className="font-mono text-[12.5px] font-bold">LIMIT {limit}</span>
+          <AnimatePresence>
+            {stage >= 4 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-2.5 flex gap-2 overflow-hidden"
+              >
+                <StatCard tone="ok" value={kept} label="returned" icon={<Check className="h-3.5 w-3.5" />} />
+                <StatCard tone="neutral" value={cut} label="cut off" icon={<X className="h-3.5 w-3.5" />} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </NodeShell>
+      </div>
+    </div>
+  );
+}
