@@ -4,6 +4,7 @@ export const LEVELS = [
   { id: "filter", label: "0 · Filter & sort", full: "WHERE, ORDER BY, LIMIT" },
   { id: "group-by", label: "1 · Group by", full: "GROUP BY, aggregates" },
   { id: "having", label: "2 · Having", full: "HAVING filters groups" },
+  { id: "join", label: "3 · Join", full: "Combine two tables" },
 ] as const;
 
 export type LevelId = (typeof LEVELS)[number]["id"];

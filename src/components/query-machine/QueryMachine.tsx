@@ -4,6 +4,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { useAppStore } from "@/store/useAppStore";
 import { GroupByView } from "./levels/GroupByView";
 import { HavingView } from "./levels/HavingView";
+import { JoinView } from "./levels/JoinView";
 import { Level0View } from "./levels/Level0View";
 import { TopBar } from "./TopBar";
 
@@ -18,6 +19,7 @@ export function QueryMachine() {
           {currentLevel === "filter" && <Level0View />}
           {currentLevel === "group-by" && <GroupByView />}
           {currentLevel === "having" && <HavingView />}
+          {currentLevel === "join" && <JoinView />}
         </div>
       </div>
     </Tooltip.Provider>

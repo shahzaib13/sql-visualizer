@@ -16,6 +16,10 @@ export const GLOSSARY: Record<string, string> = {
   DESC: "Descending — biggest value first.",
   ASC: "Ascending — smallest value first.",
   index: "A shortcut list MySQL can build on a column — like a book's index — so it can jump straight to matching rows instead of opening every single one.",
+  JOIN: "Combines rows from two separate tables into one wider row, matched on a shared column.",
+  "INNER JOIN": "Keeps only the rows that have a match in both tables — anything unmatched, on either side, is dropped entirely.",
+  "LEFT JOIN": "Keeps every row from the first (left) table no matter what — if there's no match on the right, those columns just come back empty.",
+  ON: "The condition MySQL uses to decide which row from the first table belongs with which row from the second.",
 };
 
 export type GlossaryTerm = keyof typeof GLOSSARY;

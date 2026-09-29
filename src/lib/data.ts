@@ -38,3 +38,25 @@ export const TOGGLE_COLUMNS = [
 export type ToggleColumnKey = (typeof TOGGLE_COLUMNS)[number]["key"];
 export const ORDERABLE_COLUMNS = ["likes_count", "views_count"] as const;
 export type OrderableColumn = (typeof ORDERABLE_COLUMNS)[number];
+
+export interface UserRow {
+  username: string;
+  full_name: string;
+  country: string;
+}
+
+// One row per distinct POSTS.username, plus zara_iqbal — who has never posted —
+// so INNER vs LEFT JOIN has something real to show: INNER drops her, LEFT keeps
+// her with NULL post columns.
+export const USERS: UserRow[] = [
+  { username: "sara_khan", full_name: "Sara Khan", country: "Pakistan" },
+  { username: "bilal_ahmed", full_name: "Bilal Ahmed", country: "UAE" },
+  { username: "hamza_raza", full_name: "Hamza Raza", country: "Pakistan" },
+  { username: "ayesha_malik", full_name: "Ayesha Malik", country: "UK" },
+  { username: "usman_tariq", full_name: "Usman Tariq", country: "Pakistan" },
+  { username: "zainab_qureshi", full_name: "Zainab Qureshi", country: "Canada" },
+  { username: "mariam_yousuf", full_name: "Mariam Yousuf", country: "Pakistan" },
+  { username: "dawood_khan", full_name: "Dawood Khan", country: "USA" },
+  { username: "fatima_noor", full_name: "Fatima Noor", country: "Pakistan" },
+  { username: "zara_iqbal", full_name: "Zara Iqbal", country: "Pakistan" },
+];
