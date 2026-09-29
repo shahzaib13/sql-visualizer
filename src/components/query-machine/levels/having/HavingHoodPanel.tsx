@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, X } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { POSTS } from "@/lib/data";
 import { aggLabel } from "@/lib/groupByEngine";
 import { evaluateHaving, HV_STAGES } from "@/lib/havingEngine";
@@ -20,6 +21,11 @@ export function HavingHoodPanel() {
   const grouped = stage >= 1;
   const evaluated = stage >= 2;
   const selected = stage >= 3;
+
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [stage]);
   const results = evaluateHaving(groupCol, metricCol, aggFn, havingOp, havingValue);
   const visibleResults = selected ? results.filter((r) => r.passes) : results;
 
@@ -38,7 +44,7 @@ export function HavingHoodPanel() {
           Phase {stage + 1}/{HV_STAGES.length} · {HV_STAGES[stage]}
         </span>
       </div>
-      <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
+      <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
           Query parsed — 4 clauses recognised

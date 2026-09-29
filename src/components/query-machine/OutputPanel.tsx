@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { POSTS } from "@/lib/data";
 import { classify, STAGES, type RowKind } from "@/lib/queryEngine";
 import { Term } from "@/components/ui/Term";
+import { SchemaCard, type SchemaColumn } from "./SchemaCard";
 import { cn } from "@/lib/utils";
 import { useQueryStore, type OutputFilter } from "@/store/useQueryStore";
 
@@ -64,6 +65,12 @@ function OutputRow({ id }: { id: number }) {
   const orderCol = useQueryStore((s) => s.orderCol);
   const orderDir = useQueryStore((s) => s.orderDir);
   const limit = useQueryStore((s) => s.limit);
+  const selectedCols = useQueryStore((s) => s.selectedCols);
+
+  // Before SELECT runs, every column is still "in flight" — only once we're at or
+  // past the SELECT stage do the un-picked columns actually get dropped.
+  const selectRan = stage >= 2;
+  const kept = (col: "format" | "likes_count" | "views_count") => !selectRan || selectedCols.includes(col);
 
   const { byId } = classify({ stage, threshold, orderCol, orderDir, limit });
   const info = byId.get(id)!;
@@ -109,12 +116,30 @@ function OutputRow({ id }: { id: number }) {
         {String(row.id).padStart(2, "0")}
       </span>
       <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold">{row.username}</span>
+      <span
+        className={cn(
+          "w-[42px] flex-none truncate font-mono text-[10.5px] text-text-muted transition-opacity",
+          !kept("format") && "text-text-muted/35 line-through",
+        )}
+      >
+        {row.format}
+      </span>
       <span className="flex flex-none gap-2.5 font-mono text-[11px]">
-        <span className="flex items-center gap-1 text-bad">
+        <span
+          className={cn(
+            "flex items-center gap-1 text-bad transition-opacity",
+            !kept("likes_count") && "text-text-muted/35 line-through",
+          )}
+        >
           <Heart className="h-2.5 w-2.5" fill="currentColor" strokeWidth={0} />
           {row.likes_count}
         </span>
-        <span className="flex items-center gap-1 text-flow">
+        <span
+          className={cn(
+            "flex items-center gap-1 text-flow transition-opacity",
+            !kept("views_count") && "text-text-muted/35 line-through",
+          )}
+        >
           <Eye className="h-2.5 w-2.5" />
           {row.views_count}
         </span>
@@ -126,34 +151,22 @@ function OutputRow({ id }: { id: number }) {
   );
 }
 
-const SCHEMA = [
-  { name: "id", type: "number", note: "row number" },
-  { name: "username", type: "text", note: "who posted" },
-  { name: "format", type: "text", note: "image or video" },
-  { name: "likes_count", type: "number", note: "how many likes" },
-  { name: "views_count", type: "number", note: "how many views" },
-] as const;
+const SCHEMA: SchemaColumn[] = [
+  { name: "id", type: "int", pk: true },
+  { name: "username", type: "varchar(255)" },
+  { name: "format", type: "varchar(10)" },
+  { name: "likes_count", type: "int" },
+  { name: "views_count", type: "int" },
+];
 
 function SourceTable() {
   return (
     <div>
-      <div className="rounded-xl border border-border bg-panel p-3 shadow-[var(--shadow-row)]">
-        <p className="mb-2 text-[11px] leading-relaxed text-text-muted">
-          This is <b className="text-text">posts</b> — the table every query on this level reads from.
-          Nothing here has been touched yet; it&apos;s the same {POSTS.length} rows every time.
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {SCHEMA.map((col) => (
-            <span
-              key={col.name}
-              title={col.note}
-              className="cursor-help rounded-full border border-border bg-panel-2 px-2 py-0.5 font-mono text-[10px] text-text-muted"
-            >
-              {col.name} <span className="opacity-60">· {col.type}</span>
-            </span>
-          ))}
-        </div>
-      </div>
+      <p className="mb-3 text-[11px] leading-relaxed text-text-muted">
+        This is <b className="text-text">posts</b> — the table every query on this level reads from.
+        Nothing here has been touched yet; it&apos;s the same {POSTS.length} rows every time.
+      </p>
+      <SchemaCard tableName="posts" columns={SCHEMA} />
 
       <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
         <span className="w-5 flex-none">id</span>
@@ -271,6 +284,9 @@ export function OutputPanel() {
         <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
           <span className="w-5 flex-none">id</span>
           <span className="min-w-0 flex-1">user</span>
+          <span className="w-[42px] flex-none">
+            <Term term="format">format</Term>
+          </span>
           <span className="flex flex-none gap-2.5">
             <span className="flex items-center gap-1 w-[38px]">
               <Term term="likes_count">likes</Term>

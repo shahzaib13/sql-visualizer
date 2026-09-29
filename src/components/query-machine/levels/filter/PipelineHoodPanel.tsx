@@ -2,9 +2,13 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Check, Table2, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { POSTS } from "@/lib/data";
 import { classify, passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
 import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
+
+const ALL_COLUMNS = ["username", "format", "likes_count", "views_count"] as const;
 
 function Connector({ flowing }: { flowing: boolean }) {
   return (
@@ -63,7 +67,7 @@ function NodeShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex gap-3">
+    <div id={`hood-node-${index}`} className="flex scroll-mt-4 gap-3">
       <div className="flex flex-none flex-col items-center pt-0.5">
         <motion.button
           type="button"
@@ -123,6 +127,22 @@ export function PipelineHoodPanel() {
   const dropped = total - passing;
   const kept = Math.min(limit, passing);
   const cut = Math.max(0, passing - limit);
+
+  const passingRows = POSTS.filter((r) => r.likes_count > threshold);
+  const beforeOrderIds = passingRows.map((r) => r.id);
+  const orderSign = orderDir === "DESC" ? -1 : 1;
+  const afterOrderIds = [...passingRows].sort((a, b) => (a[orderCol] - b[orderCol]) * orderSign).map((r) => r.id);
+
+  // Follow the command panel's stage — without this the active node can be
+  // scrolled off-screen and a control change looks like it did nothing.
+  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    document.getElementById(`hood-node-${stage + 1}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [stage]);
 
   return (
     <div className="flex h-full flex-col">
@@ -243,9 +263,34 @@ export function PipelineHoodPanel() {
         <NodeShell index={3} active={stage === 2} reached={stage >= 2} onClick={() => setStage(2)}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-mono text-[12.5px] font-bold">SELECT {selectColsText(selectedCols)}</span>
-            <Badge tone="neutral">{selectedCols.length + 1} cols</Badge>
+            <Badge tone="neutral">{selectedCols.length + 1} of {ALL_COLUMNS.length} cols</Badge>
           </div>
-          <p className="mt-1.5 text-[10.5px] text-text-muted">Pruning to only the requested columns.</p>
+          <p className="mt-1.5 mb-2 text-[10.5px] text-text-muted">
+            {stage >= 2
+              ? "Every column below was available — only the highlighted ones survive SELECT."
+              : "Not reached yet — every column below is still available."}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {ALL_COLUMNS.map((col) => {
+              const isKept = col === "username" || selectedCols.includes(col);
+              const decided = stage >= 2;
+              return (
+                <span
+                  key={col}
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 font-mono text-[10.5px] font-semibold transition-all",
+                    !decided
+                      ? "border-border bg-panel text-text-muted"
+                      : isKept
+                        ? "border-ok bg-ok/15 text-ok"
+                        : "border-border bg-panel text-text-muted/40 line-through",
+                  )}
+                >
+                  {col}
+                </span>
+              );
+            })}
+          </div>
         </NodeShell>
 
         <Connector flowing={stage >= 3} />
@@ -255,7 +300,31 @@ export function PipelineHoodPanel() {
           <span className="font-mono text-[12.5px] font-bold">
             ORDER BY {orderCol} {orderDir}
           </span>
-          <p className="mt-1.5 text-[10.5px] text-text-muted">Sorting the surviving rows in memory.</p>
+          {stage >= 3 ? (
+            <div className="mt-2.5 flex items-center gap-2">
+              <div className="flex flex-1 flex-wrap gap-1 rounded-md border border-border bg-panel-2 p-1.5">
+                {beforeOrderIds.map((id) => (
+                  <span key={id} className="grid h-5 w-5 place-items-center rounded bg-panel font-mono text-[9px] text-text-muted">
+                    {id}
+                  </span>
+                ))}
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 flex-none text-text-muted" />
+              <div className="flex flex-1 flex-wrap gap-1 rounded-md border border-accent/40 bg-accent/10 p-1.5">
+                {afterOrderIds.map((id) => (
+                  <motion.span
+                    key={id}
+                    layout
+                    className="grid h-5 w-5 place-items-center rounded bg-accent font-mono text-[9px] font-bold text-accent-ink"
+                  >
+                    {id}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-1.5 text-[10.5px] text-text-muted">Not reached yet — rows are still in load order.</p>
+          )}
         </NodeShell>
 
         <Connector flowing={stage >= 4} />
