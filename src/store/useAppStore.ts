@@ -6,6 +6,7 @@ export const LEVELS = [
   { id: "having", label: "2 · Having", full: "HAVING filters groups" },
   { id: "join", label: "3 · Join", full: "Combine two tables" },
   { id: "set-ops", label: "4 · Set ops", full: "UNION, INTERSECT, EXCEPT" },
+  { id: "subquery", label: "5 · Subquery", full: "A query nested inside another" },
 ] as const;
 
 export type LevelId = (typeof LEVELS)[number]["id"];

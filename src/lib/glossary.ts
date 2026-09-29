@@ -23,6 +23,8 @@ export const GLOSSARY: Record<string, string> = {
   UNION: "Stacks the results of two SELECTs into one list and removes exact duplicate rows.",
   INTERSECT: "Keeps only the rows that show up in both SELECTs' results.",
   EXCEPT: "Keeps rows from the first SELECT that do NOT also appear in the second SELECT's results.",
+  subquery: "A query nested inside another query. MySQL runs the inner one first and feeds its result into the outer query — as if it were typed there directly.",
+  "scalar subquery": "A subquery that returns exactly one value — one row, one column — so it can stand in anywhere a single number is expected, like next to > or =.",
 };
 
 export type GlossaryTerm = keyof typeof GLOSSARY;

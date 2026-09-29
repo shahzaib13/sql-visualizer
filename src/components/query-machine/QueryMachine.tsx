@@ -7,6 +7,7 @@ import { HavingView } from "./levels/HavingView";
 import { JoinView } from "./levels/JoinView";
 import { Level0View } from "./levels/Level0View";
 import { SetOpsView } from "./levels/SetOpsView";
+import { SubqueryView } from "./levels/SubqueryView";
 import { TopBar } from "./TopBar";
 
 export function QueryMachine() {
@@ -22,6 +23,7 @@ export function QueryMachine() {
           {currentLevel === "having" && <HavingView />}
           {currentLevel === "join" && <JoinView />}
           {currentLevel === "set-ops" && <SetOpsView />}
+          {currentLevel === "subquery" && <SubqueryView />}
         </div>
       </div>
     </Tooltip.Provider>
