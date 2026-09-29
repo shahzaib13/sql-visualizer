@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type { OrderableColumn, ToggleColumnKey } from "@/lib/data";
 
-export type HoodLayerId = "parser" | "optimizer" | "engine" | "storage";
 export type OutputFilter = "all" | "included" | "excluded" | "cut";
 
 interface QueryState {
@@ -13,9 +12,7 @@ interface QueryState {
   limit: number;
   simIndex: boolean;
   filter: OutputFilter;
-
   isPlaying: boolean;
-  collapsedLayers: Record<HoodLayerId, boolean>;
 
   setStage: (stage: number) => void;
   setThreshold: (threshold: number) => void;
@@ -26,7 +23,6 @@ interface QueryState {
   setSimIndex: (on: boolean) => void;
   setFilter: (filter: OutputFilter) => void;
   setPlaying: (playing: boolean) => void;
-  toggleLayer: (id: HoodLayerId) => void;
   reset: () => void;
 }
 
@@ -44,7 +40,6 @@ const DEFAULTS = {
 export const useQueryStore = create<QueryState>((set) => ({
   ...DEFAULTS,
   isPlaying: false,
-  collapsedLayers: { parser: false, optimizer: false, engine: false, storage: false },
 
   setStage: (stage) => set({ stage, isPlaying: false }),
   setThreshold: (threshold) => set({ threshold }),
@@ -63,7 +58,5 @@ export const useQueryStore = create<QueryState>((set) => ({
   setSimIndex: (simIndex) => set({ simIndex }),
   setFilter: (filter) => set({ filter }),
   setPlaying: (isPlaying) => set({ isPlaying }),
-  toggleLayer: (id) =>
-    set((s) => ({ collapsedLayers: { ...s.collapsedLayers, [id]: !s.collapsedLayers[id] } })),
   reset: () => set({ ...DEFAULTS, isPlaying: false }),
 }));

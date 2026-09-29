@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Query Machine — SQL, level by level",
   description:
-    "An interactive workbench that steps SQL queries through MySQL's real execution order — parser, optimizer, execution engine, and storage — one level at a time.",
+    "An interactive workbench that steps SQL queries through MySQL's real execution order, one clause at a time — from WHERE and GROUP BY through JOIN, set operations, and subqueries.",
 };
 
 const THEME_INIT_SCRIPT = `

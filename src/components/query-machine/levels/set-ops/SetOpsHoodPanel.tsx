@@ -27,27 +27,37 @@ function VennDiagram({ op }: { op: SetOp }) {
 
       {op === "UNION" && (
         <>
+          {/* Layered opacity, not mix-blend-mode — multiply washes to near-black on a dark panel. */}
           <motion.circle
             key="union-a"
             initial={{ fillOpacity: 0 }}
-            animate={{ fillOpacity: 0.4 }}
+            animate={{ fillOpacity: 0.32 }}
             transition={{ duration: 0.35 }}
             cx={CX_A}
             cy={CY}
             r={R}
             fill="var(--accent)"
-            style={{ mixBlendMode: "multiply" }}
           />
           <motion.circle
             key="union-b"
             initial={{ fillOpacity: 0 }}
-            animate={{ fillOpacity: 0.4 }}
+            animate={{ fillOpacity: 0.32 }}
             transition={{ duration: 0.35 }}
             cx={CX_B}
             cy={CY}
             r={R}
             fill="var(--accent)"
-            style={{ mixBlendMode: "multiply" }}
+          />
+          <motion.circle
+            key="union-lens"
+            initial={{ fillOpacity: 0 }}
+            animate={{ fillOpacity: 0.5 }}
+            transition={{ duration: 0.35 }}
+            cx={CX_A}
+            cy={CY}
+            r={R}
+            clipPath="url(#setops-lens)"
+            fill="var(--accent)"
           />
         </>
       )}
