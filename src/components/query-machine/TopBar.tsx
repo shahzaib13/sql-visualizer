@@ -1,10 +1,11 @@
 "use client";
 
 import * as Switch from "@radix-ui/react-switch";
+import { motion } from "framer-motion";
 import { Cog, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { STAGES } from "@/lib/queryEngine";
-import { useQueryStore } from "@/store/useQueryStore";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { LEVELS, useAppStore } from "@/store/useAppStore";
 
 function useTheme() {
   // Starts null on purpose: the server can't know the client's theme, and the inline
@@ -28,10 +29,48 @@ function useTheme() {
   return { dark, toggle };
 }
 
+function LevelNav() {
+  const currentLevel = useAppStore((s) => s.currentLevel);
+  const setLevel = useAppStore((s) => s.setLevel);
+  const refs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const el = refs.current[currentLevel];
+    if (el) setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+  }, [currentLevel]);
+
+  return (
+    <div className="relative flex gap-0.5 rounded-lg border border-border bg-panel-2 p-[3px]">
+      <motion.span
+        className="absolute top-[3px] bottom-[3px] z-0 rounded-md bg-accent"
+        animate={indicator}
+        transition={{ type: "spring", stiffness: 500, damping: 34 }}
+      />
+      {LEVELS.map((lvl) => (
+        <button
+          key={lvl.id}
+          type="button"
+          ref={(el) => {
+            refs.current[lvl.id] = el;
+          }}
+          onClick={() => setLevel(lvl.id)}
+          title={lvl.full}
+          className={cn(
+            "relative z-10 rounded-md px-3 py-1.5 font-mono text-[11px] font-semibold whitespace-nowrap transition-colors",
+            currentLevel === lvl.id ? "text-accent-ink" : "text-text-muted hover:text-text",
+          )}
+        >
+          {lvl.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function TopBar() {
-  const stage = useQueryStore((s) => s.stage);
-  const hoodOpen = useQueryStore((s) => s.hoodOpen);
-  const toggleHood = useQueryStore((s) => s.toggleHood);
+  const hoodOpen = useAppStore((s) => s.hoodOpen);
+  const toggleHood = useAppStore((s) => s.toggleHood);
   const { dark, toggle } = useTheme();
 
   return (
@@ -47,9 +86,7 @@ export function TopBar() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3.5">
-        <span className="rounded-full border border-border bg-panel-2 px-3 py-1 font-mono text-[11px] font-semibold tracking-wide text-flow">
-          {STAGES[stage]}
-        </span>
+        <LevelNav />
 
         <button
           type="button"

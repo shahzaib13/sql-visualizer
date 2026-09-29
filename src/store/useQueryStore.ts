@@ -15,7 +15,6 @@ interface QueryState {
   filter: OutputFilter;
 
   isPlaying: boolean;
-  hoodOpen: boolean;
   collapsedLayers: Record<HoodLayerId, boolean>;
 
   setStage: (stage: number) => void;
@@ -27,7 +26,6 @@ interface QueryState {
   setSimIndex: (on: boolean) => void;
   setFilter: (filter: OutputFilter) => void;
   setPlaying: (playing: boolean) => void;
-  toggleHood: () => void;
   toggleLayer: (id: HoodLayerId) => void;
   reset: () => void;
 }
@@ -46,7 +44,6 @@ const DEFAULTS = {
 export const useQueryStore = create<QueryState>((set) => ({
   ...DEFAULTS,
   isPlaying: false,
-  hoodOpen: true,
   collapsedLayers: { parser: false, optimizer: false, engine: false, storage: false },
 
   setStage: (stage) => set({ stage, isPlaying: false }),
@@ -66,7 +63,6 @@ export const useQueryStore = create<QueryState>((set) => ({
   setSimIndex: (simIndex) => set({ simIndex }),
   setFilter: (filter) => set({ filter }),
   setPlaying: (isPlaying) => set({ isPlaying }),
-  toggleHood: () => set((s) => ({ hoodOpen: !s.hoodOpen })),
   toggleLayer: (id) =>
     set((s) => ({ collapsedLayers: { ...s.collapsedLayers, [id]: !s.collapsedLayers[id] } })),
   reset: () => set({ ...DEFAULTS, isPlaying: false }),
