@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Minus, Pause, Play, Plus, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ORDERABLE_COLUMNS, TOGGLE_COLUMNS } from "@/lib/data";
@@ -51,17 +51,18 @@ function StatusLine() {
 
   return (
     <div className="mt-3.5 flex min-h-8 items-center overflow-hidden rounded-md border border-border bg-panel-2 px-3 py-2 font-mono text-[11.5px] text-flow">
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={text}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          {text}
-        </motion.span>
-      </AnimatePresence>
+      {/* No AnimatePresence here on purpose — with mode="wait" this stalls permanently
+          when the key changes faster than the exit+enter transition can settle (e.g.
+          clicking through stage ticks quickly). A keyed remount still gets the fade-in
+          via initial->animate; it just skips animating the old text out. */}
+      <motion.span
+        key={text}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        {text}
+      </motion.span>
     </div>
   );
 }
@@ -212,17 +213,15 @@ function ThresholdCard() {
         <span>
           WHERE likes_count &gt;{" "}
           <span className="font-mono text-accent">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={threshold}
-                initial={{ scale: 1.3, color: "var(--warn)" }}
-                animate={{ scale: 1, color: "var(--accent)" }}
-                transition={{ duration: 0.28 }}
-                className="inline-block"
-              >
-                {threshold}
-              </motion.span>
-            </AnimatePresence>
+            <motion.span
+              key={threshold}
+              initial={{ scale: 1.3, color: "var(--warn)" }}
+              animate={{ scale: 1, color: "var(--accent)" }}
+              transition={{ duration: 0.28 }}
+              className="inline-block"
+            >
+              {threshold}
+            </motion.span>
           </span>
         </span>
       </label>
@@ -338,17 +337,15 @@ function LimitCard() {
           <Minus className="h-3.5 w-3.5" />
         </button>
         <span className="min-w-[14px] text-center font-mono font-bold">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={limit}
-              initial={{ scale: 1.3, color: "var(--warn)" }}
-              animate={{ scale: 1, color: "var(--text)" }}
-              transition={{ duration: 0.28 }}
-              className="inline-block"
-            >
-              {limit}
-            </motion.span>
-          </AnimatePresence>
+          <motion.span
+            key={limit}
+            initial={{ scale: 1.3, color: "var(--warn)" }}
+            animate={{ scale: 1, color: "var(--text)" }}
+            transition={{ duration: 0.28 }}
+            className="inline-block"
+          >
+            {limit}
+          </motion.span>
         </span>
         <button
           type="button"

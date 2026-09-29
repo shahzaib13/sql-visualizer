@@ -29,17 +29,14 @@ export function GroupByHoodPanel() {
         <span className="font-mono text-[11px] text-text-muted">{GB_STAGES[stage]}</span>
       </div>
       <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={caption}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mb-4 rounded-xl border border-border bg-panel p-2.5 text-[11.5px] leading-relaxed text-text-muted shadow-[var(--shadow-row)]"
-          >
-            {caption}
-          </motion.p>
-        </AnimatePresence>
+        <motion.p
+          key={caption}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 rounded-xl border border-border bg-panel p-2.5 text-[11.5px] leading-relaxed text-text-muted shadow-[var(--shadow-row)]"
+        >
+          {caption}
+        </motion.p>
 
         {!grouped ? (
           <div className="flex flex-wrap gap-2">
@@ -63,7 +60,7 @@ export function GroupByHoodPanel() {
                   >
                     {groupCol} = &quot;{g.key}&quot;
                   </span>
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence>
                     {computed && (
                       <motion.span
                         key={`${g.key}-${g.value}`}
