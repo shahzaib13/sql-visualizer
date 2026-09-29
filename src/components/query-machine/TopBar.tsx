@@ -2,10 +2,11 @@
 
 import * as Switch from "@radix-ui/react-switch";
 import { motion } from "framer-motion";
-import { Cog, Moon, Sun } from "lucide-react";
+import { Check, Cog, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { LEVELS, useAppStore } from "@/store/useAppStore";
+import { useProgressStore } from "@/store/useProgressStore";
 
 function useTheme() {
   // Starts null on purpose: the server can't know the client's theme, and the inline
@@ -32,6 +33,7 @@ function useTheme() {
 function LevelNav() {
   const currentLevel = useAppStore((s) => s.currentLevel);
   const setLevel = useAppStore((s) => s.setLevel);
+  const quizPassed = useProgressStore((s) => s.quizPassed);
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
 
@@ -55,15 +57,50 @@ function LevelNav() {
             refs.current[lvl.id] = el;
           }}
           onClick={() => setLevel(lvl.id)}
-          title={lvl.full}
+          title={quizPassed[lvl.id] ? `${lvl.full} — quiz passed` : lvl.full}
           className={cn(
-            "relative z-10 rounded-md px-3 py-1.5 font-mono text-[11px] font-semibold whitespace-nowrap transition-colors",
+            "relative z-10 flex items-center gap-1 rounded-md px-3 py-1.5 font-mono text-[11px] font-semibold whitespace-nowrap transition-colors",
             currentLevel === lvl.id ? "text-accent-ink" : "text-text-muted hover:text-text",
           )}
         >
           {lvl.label}
+          {quizPassed[lvl.id] && (
+            <span
+              className={cn(
+                "grid h-3 w-3 flex-none place-items-center rounded-full",
+                currentLevel === lvl.id ? "bg-accent-ink/25" : "bg-ok/20 text-ok",
+              )}
+            >
+              <Check className="h-2 w-2" strokeWidth={4} />
+            </span>
+          )}
         </button>
       ))}
+    </div>
+  );
+}
+
+function ProgressDots() {
+  const quizPassed = useProgressStore((s) => s.quizPassed);
+  const passedCount = LEVELS.filter((l) => quizPassed[l.id]).length;
+
+  return (
+    <div className="flex items-center gap-1.5" title={`${passedCount} of ${LEVELS.length} level quizzes passed`}>
+      <div className="flex gap-[3px]">
+        {LEVELS.map((l) => (
+          <motion.span
+            key={l.id}
+            animate={{
+              backgroundColor: quizPassed[l.id] ? "var(--ok)" : "var(--border)",
+              scale: quizPassed[l.id] ? 1 : 0.85,
+            }}
+            className="h-[6px] w-[6px] rounded-full"
+          />
+        ))}
+      </div>
+      <span className="font-mono text-[10px] font-semibold text-text-muted">
+        {passedCount}/{LEVELS.length}
+      </span>
     </div>
   );
 }
@@ -83,6 +120,9 @@ export function TopBar() {
           <b className="text-[15px] font-bold tracking-tight">Query Machine</b>
           <span className="text-[11.5px] text-text-muted">MySQL execution, level by level</span>
         </div>
+        <span className="ml-1 hidden sm:block">
+          <ProgressDots />
+        </span>
       </div>
 
       <div className="flex flex-wrap items-center gap-3.5">

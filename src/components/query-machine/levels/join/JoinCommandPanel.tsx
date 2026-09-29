@@ -8,6 +8,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { joinRows, JOIN_STAGES, JOIN_TYPES, unmatchedUsers } from "@/lib/joinEngine";
 import { cn } from "@/lib/utils";
 import { useJoinStore } from "@/store/useJoinStore";
+import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
 import { Term } from "@/components/ui/Term";
 
@@ -204,6 +205,7 @@ export function JoinCommandPanel() {
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">
         <JoinTypeCard />
+        <QuizCard level="join" />
       </div>
     </div>
   );

@@ -5,8 +5,7 @@ export type SetOp = (typeof SET_OPS)[number];
 
 export const SETOPS_STAGES = ["QUERY A", "QUERY B", "COMBINE"] as const;
 
-// Fixed, simple conditions on purpose — this level teaches how two result
-// sets combine, not another round of tunable filters.
+// Fixed, simple conditions on purpose — this level teaches how result sets combine, not another round of filters.
 export function queryA(): PostRow[] {
   return POSTS.filter((p) => p.format === "video");
 }

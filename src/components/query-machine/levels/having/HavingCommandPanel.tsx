@@ -10,6 +10,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
 import { useHavingStore } from "@/store/useHavingStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
+import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
 
 function useAutoPlay() {
@@ -315,6 +316,7 @@ export function HavingCommandPanel() {
         <GroupByColumnCard />
         <AggregateCard />
         <HavingCard />
+        <QuizCard level="having" />
       </div>
     </div>
   );

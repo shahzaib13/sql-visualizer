@@ -12,13 +12,7 @@ export interface JoinedRow {
   post: PostRow | null;
 }
 
-/**
- * FROM users u {joinType} JOIN posts p ON u.username = p.username
- *
- * Walking from users (the "left" table) mirrors how MySQL actually evaluates
- * a two-table join: for every left row, find every matching right row. INNER
- * drops left rows with zero matches; LEFT keeps them once with post: null.
- */
+// FROM users u {joinType} JOIN posts p ON u.username = p.username — walks left-to-right like MySQL does.
 export function joinRows(joinType: JoinType): JoinedRow[] {
   const rows: JoinedRow[] = [];
   for (const user of USERS) {

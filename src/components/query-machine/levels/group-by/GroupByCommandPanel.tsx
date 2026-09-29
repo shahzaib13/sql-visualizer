@@ -8,6 +8,7 @@ import { POSTS } from "@/lib/data";
 import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
+import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
 
 function useAutoPlay() {
@@ -260,6 +261,7 @@ export function GroupByCommandPanel() {
       <div className="mt-5 flex flex-col gap-3">
         <GroupByColumnCard />
         <AggregateCard />
+        <QuizCard level="group-by" />
       </div>
     </div>
   );

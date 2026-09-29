@@ -8,13 +8,7 @@ export interface SchemaColumn {
   fk?: boolean;
 }
 
-/**
- * A classic ER-diagram table box (name header, PK-flagged columns, type
- * column) — the same visual language MySQL Workbench / dbdiagram.io use.
- * Reusable so the JOIN level can drop two of these side by side; `highlight`
- * marks the shared join-key column in both so the relationship reads without
- * needing a fragile hand-drawn connector line between two independent cards.
- */
+// ER-diagram table box; `highlight` marks a shared join-key column so two side-by-side cards read as related.
 export function SchemaCard({
   tableName,
   columns,

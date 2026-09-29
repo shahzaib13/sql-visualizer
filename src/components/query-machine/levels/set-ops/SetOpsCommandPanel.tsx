@@ -7,6 +7,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { combine, queryA, queryB, SET_OPS, SETOPS_STAGES } from "@/lib/setOpsEngine";
 import { cn } from "@/lib/utils";
 import { useSetOpsStore } from "@/store/useSetOpsStore";
+import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
 import { Term } from "@/components/ui/Term";
 
@@ -195,6 +196,7 @@ export function SetOpsCommandPanel() {
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">
         <OpCard />
+        <QuizCard level="set-ops" />
       </div>
     </div>
   );

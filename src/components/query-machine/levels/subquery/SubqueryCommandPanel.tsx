@@ -8,6 +8,7 @@ import { GLOSSARY } from "@/lib/glossary";
 import { classifyBySubquery, COMPARE_OPS, subqueryAvgLikes, SUBQUERY_STAGES } from "@/lib/subqueryEngine";
 import { cn } from "@/lib/utils";
 import { useSubqueryStore } from "@/store/useSubqueryStore";
+import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
 import { Term } from "@/components/ui/Term";
 
@@ -209,6 +210,7 @@ export function SubqueryCommandPanel() {
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">
         <OpCard />
+        <QuizCard level="subquery" />
       </div>
     </div>
   );

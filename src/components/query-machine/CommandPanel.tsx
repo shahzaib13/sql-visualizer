@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
 import { Term } from "@/components/ui/Term";
+import { QuizCard } from "./QuizCard";
 import { TheoryCard } from "./TheoryCard";
 
 const CLAUSE_ORDER = ["SELECT", "FROM", "WHERE", "ORDER BY", "LIMIT"] as const;
@@ -407,6 +408,7 @@ export function CommandPanel() {
         <SelectColumnsCard />
         <OrderByCard />
         <LimitCard />
+        <QuizCard level="filter" />
       </div>
     </div>
   );

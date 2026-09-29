@@ -5,12 +5,7 @@ export interface TheoryKeyword {
   note: string;
 }
 
-/**
- * Sits above the SQL block on every level's command panel. A beginner opening
- * this for the first time doesn't know what the query is *for* — this spells
- * out the goal in plain English, then breaks down each keyword used on this
- * level, so tooltip-hunting isn't required to follow along.
- */
+// Sits above the SQL block on every level — states the query's goal in plain English so tooltip-hunting isn't required.
 export function TheoryCard({ goal, keywords }: { goal: string; keywords: TheoryKeyword[] }) {
   return (
     <div className="mb-3.5 rounded-xl border border-border bg-panel-2 p-3.5">

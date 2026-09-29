@@ -45,9 +45,7 @@ export interface UserRow {
   country: string;
 }
 
-// One row per distinct POSTS.username, plus zara_iqbal — who has never posted —
-// so INNER vs LEFT JOIN has something real to show: INNER drops her, LEFT keeps
-// her with NULL post columns.
+// One row per distinct POSTS.username, plus zara_iqbal — unposted, so INNER vs LEFT JOIN visibly differ.
 export const USERS: UserRow[] = [
   { username: "sara_khan", full_name: "Sara Khan", country: "Pakistan" },
   { username: "bilal_ahmed", full_name: "Bilal Ahmed", country: "UAE" },
