@@ -20,6 +20,9 @@ export const GLOSSARY: Record<string, string> = {
   "INNER JOIN": "Keeps only the rows that have a match in both tables — anything unmatched, on either side, is dropped entirely.",
   "LEFT JOIN": "Keeps every row from the first (left) table no matter what — if there's no match on the right, those columns just come back empty.",
   ON: "The condition MySQL uses to decide which row from the first table belongs with which row from the second.",
+  UNION: "Stacks the results of two SELECTs into one list and removes exact duplicate rows.",
+  INTERSECT: "Keeps only the rows that show up in both SELECTs' results.",
+  EXCEPT: "Keeps rows from the first SELECT that do NOT also appear in the second SELECT's results.",
 };
 
 export type GlossaryTerm = keyof typeof GLOSSARY;
