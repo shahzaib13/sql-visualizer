@@ -15,6 +15,7 @@ export const GLOSSARY: Record<string, string> = {
   username: "Who posted it.",
   DESC: "Descending — biggest value first.",
   ASC: "Ascending — smallest value first.",
+  index: "A shortcut list MySQL can build on a column — like a book's index — so it can jump straight to matching rows instead of opening every single one.",
 };
 
 export type GlossaryTerm = keyof typeof GLOSSARY;

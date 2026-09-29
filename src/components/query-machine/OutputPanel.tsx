@@ -223,7 +223,7 @@ export function OutputPanel() {
     })
     .map(([id]) => id);
 
-  const bigCount = filter === "all" ? 8 : filter === "included" ? includedCount : filter === "excluded" ? excludedCount : cutCount;
+  const bigCount = filter === "all" ? POSTS.length : filter === "included" ? includedCount : filter === "excluded" ? excludedCount : cutCount;
   const [view, setView] = useState<"input" | "output">("output");
 
   return (

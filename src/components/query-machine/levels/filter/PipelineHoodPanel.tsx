@@ -7,6 +7,7 @@ import { POSTS } from "@/lib/data";
 import { classify, passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
 import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
+import { Term } from "@/components/ui/Term";
 
 const ALL_COLUMNS = ["username", "format", "likes_count", "views_count"] as const;
 
@@ -121,7 +122,7 @@ export function PipelineHoodPanel() {
   const setSimIndex = useQueryStore((s) => s.setSimIndex);
   const setStage = useQueryStore((s) => s.setStage);
 
-  const total = 8;
+  const total = POSTS.length;
   const cls = classify({ stage, threshold, orderCol, orderDir, limit });
   const passing = passingCount(threshold);
   const dropped = total - passing;
@@ -168,7 +169,7 @@ export function PipelineHoodPanel() {
             </span>
             <Badge tone="neutral">Base table</Badge>
           </div>
-          <p className="mt-1.5 text-[10.5px] text-text-muted">Memory page scan — {total} rows read</p>
+          <p className="mt-1.5 text-[10.5px] text-text-muted">Loads every row from the table — {total} rows read</p>
         </NodeShell>
 
         <Connector flowing={stage >= 1} />
@@ -196,7 +197,16 @@ export function PipelineHoodPanel() {
                 </div>
 
                 <div className="mt-3 rounded-lg border border-border bg-panel-2 p-2.5">
-                  <p className="mb-2 text-[10px] font-bold tracking-wide text-text-muted uppercase">Access plan</p>
+                  <p className="mb-1.5 text-[10px] font-bold tracking-wide text-text-muted uppercase">
+                    How MySQL finds the matching rows
+                  </p>
+                  <p className="mb-2 text-[10px] leading-snug text-text-muted">
+                    It can either check every row one by one, or use a shortcut called an{" "}
+                    <Term term="index" className="underline decoration-dotted">
+                      index
+                    </Term>{" "}
+                    — like a book&apos;s index — to jump straight to the rows that match.
+                  </p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"
@@ -206,7 +216,7 @@ export function PipelineHoodPanel() {
                         !simIndex ? "border-flow bg-flow/15 text-flow" : "border-border text-text-muted",
                       )}
                     >
-                      Full table scan
+                      Check every row
                     </button>
                     <button
                       type="button"
@@ -216,17 +226,20 @@ export function PipelineHoodPanel() {
                         simIndex ? "border-ok bg-ok/15 text-ok" : "border-border text-text-muted",
                       )}
                     >
-                      Index seek (likes_count)
+                      Use an index (jump to matches)
                     </button>
                   </div>
                   <p className="mt-2 text-[10px] leading-snug text-text-muted">
                     {simIndex
-                      ? `The index jumps straight to matches — only ${passing} of ${total} pages ever get opened.`
-                      : `No index exists, so every page is opened and checked — all ${total} pages, even the ${dropped} that fail.`}
+                      ? `With an index on likes_count, MySQL jumps straight to the matches — only ${passing} of ${total} rows are ever touched.`
+                      : `Without an index, MySQL has no shortcut — it opens and checks every single row, all ${total} of them, even the ${dropped} that end up failing.`}
                   </p>
                 </div>
 
-                <div className="mt-2.5 flex flex-wrap gap-1">
+                <p className="mt-2.5 mb-1 text-[9.5px] font-semibold tracking-wide text-text-muted uppercase">
+                  {simIndex ? "Rows actually touched:" : "Rows checked, one by one:"}
+                </p>
+                <div className="flex flex-wrap gap-1">
                   {Array.from({ length: total }).map((_, i) => {
                     const id = i + 1;
                     const row = cls.byId.get(id);
@@ -235,7 +248,7 @@ export function PipelineHoodPanel() {
                     return (
                       <span
                         key={id}
-                        title={`P${id}`}
+                        title={skipped ? `Row ${id} — skipped, index knew it wouldn't match` : `Row ${id}`}
                         className={cn(
                           "grid h-6 w-6 place-items-center rounded border font-mono text-[8px] font-bold",
                           skipped

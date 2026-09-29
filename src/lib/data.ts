@@ -7,14 +7,26 @@ export interface PostRow {
 }
 
 export const POSTS: PostRow[] = [
-  { id: 1, username: "shah_zaib", format: "image", likes_count: 120, views_count: 450 },
-  { id: 2, username: "ozain", format: "video", likes_count: 850, views_count: 3200 },
-  { id: 3, username: "shah_zaib", format: "image", likes_count: 45, views_count: 150 },
-  { id: 4, username: "dawood", format: "image", likes_count: 1050, views_count: 4100 },
-  { id: 5, username: "abdullah", format: "video", likes_count: 340, views_count: 1200 },
-  { id: 6, username: "asjal", format: "image", likes_count: 78, views_count: 290 },
-  { id: 7, username: "ozain", format: "image", likes_count: 55, views_count: 180 },
-  { id: 8, username: "dawood", format: "video", likes_count: 420, views_count: 1500 },
+  { id: 1, username: "sara_khan", format: "image", likes_count: 210, views_count: 780 },
+  { id: 2, username: "bilal_ahmed", format: "video", likes_count: 630, views_count: 2400 },
+  { id: 3, username: "sara_khan", format: "video", likes_count: 95, views_count: 340 },
+  { id: 4, username: "hamza_raza", format: "image", likes_count: 1080, views_count: 4200 },
+  { id: 5, username: "ayesha_malik", format: "video", likes_count: 460, views_count: 1700 },
+  { id: 6, username: "usman_tariq", format: "image", likes_count: 58, views_count: 210 },
+  { id: 7, username: "bilal_ahmed", format: "image", likes_count: 340, views_count: 1250 },
+  { id: 8, username: "zainab_qureshi", format: "video", likes_count: 720, views_count: 2900 },
+  { id: 9, username: "hamza_raza", format: "video", likes_count: 150, views_count: 560 },
+  { id: 10, username: "mariam_yousuf", format: "image", likes_count: 890, views_count: 3400 },
+  { id: 11, username: "usman_tariq", format: "video", likes_count: 275, views_count: 990 },
+  { id: 12, username: "ayesha_malik", format: "image", likes_count: 40, views_count: 130 },
+  { id: 13, username: "dawood_khan", format: "image", likes_count: 610, views_count: 2200 },
+  { id: 14, username: "sara_khan", format: "image", likes_count: 480, views_count: 1800 },
+  { id: 15, username: "fatima_noor", format: "video", likes_count: 990, views_count: 3900 },
+  { id: 16, username: "bilal_ahmed", format: "video", likes_count: 200, views_count: 750 },
+  { id: 17, username: "zainab_qureshi", format: "image", likes_count: 65, views_count: 240 },
+  { id: 18, username: "hamza_raza", format: "image", likes_count: 350, views_count: 1300 },
+  { id: 19, username: "mariam_yousuf", format: "video", likes_count: 120, views_count: 430 },
+  { id: 20, username: "usman_tariq", format: "image", likes_count: 800, views_count: 3100 },
 ];
 
 export const TOGGLE_COLUMNS = [

@@ -4,8 +4,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { AGG_FNS, GB_STAGES, GROUP_COLUMNS, METRIC_COLUMNS, aggLabel, groupRows } from "@/lib/groupByEngine";
+import { POSTS } from "@/lib/data";
+import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
+import { TheoryCard } from "@/components/query-machine/TheoryCard";
 
 function useAutoPlay() {
   const isPlaying = useGroupByStore((s) => s.isPlaying);
@@ -84,7 +87,7 @@ function StatusLine() {
   const groups = groupRows(groupCol, metricCol, aggFn);
 
   const text = [
-    "FROM posts — 8 rows loaded, still flat",
+    `FROM posts — ${POSTS.length} rows loaded, still flat`,
     `GROUP BY ${groupCol} — collapsed into ${groups.length} groups`,
     `SELECT ${groupCol}, ${aggLabel(aggFn, metricCol)} — ${groups.length} row(s) returned`,
   ][stage];
@@ -243,10 +246,15 @@ function AggregateCard() {
 export function GroupByCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <p className="mb-3.5 rounded-xl border border-border bg-panel-2 p-2.5 text-[11.5px] leading-relaxed text-text-muted">
-        GROUP BY runs <b className="text-text">before</b> SELECT — MySQL first collapses matching rows into
-        buckets, then computes one aggregate value per bucket.
-      </p>
+      <TheoryCard
+        goal="This query stops looking at posts one row at a time. Instead it sorts every row into buckets that share the same value — for example, every image post in one bucket and every video post in another — and then calculates a single summary number for each bucket, like &ldquo;how many posts are in this bucket?&rdquo; GROUP BY runs before SELECT: MySQL first builds the buckets, then computes one value per bucket."
+        keywords={[
+          { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
+          { term: "COUNT(*)", note: GLOSSARY["COUNT(*)"] },
+          { term: "SUM", note: GLOSSARY.SUM },
+          { term: "AVG", note: GLOSSARY.AVG },
+        ]}
+      />
       <SqlBlock />
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">

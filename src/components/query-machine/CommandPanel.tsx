@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import { Minus, Pause, Play, Plus, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { ORDERABLE_COLUMNS, TOGGLE_COLUMNS } from "@/lib/data";
+import { ORDERABLE_COLUMNS, POSTS, TOGGLE_COLUMNS } from "@/lib/data";
 import { GLOSSARY } from "@/lib/glossary";
 import { passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
 import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
 import { Term } from "@/components/ui/Term";
+import { TheoryCard } from "./TheoryCard";
 
 const CLAUSE_ORDER = ["SELECT", "FROM", "WHERE", "ORDER BY", "LIMIT"] as const;
 const EXEC_NO: Record<string, number> = { SELECT: 3, FROM: 1, WHERE: 2, "ORDER BY": 4, LIMIT: 5 };
@@ -40,7 +41,7 @@ function StatusLine() {
   const orderCol = useQueryStore((s) => s.orderCol);
   const orderDir = useQueryStore((s) => s.orderDir);
   const limit = useQueryStore((s) => s.limit);
-  const total = 8;
+  const total = POSTS.length;
   const passing = passingCount(threshold);
 
   const text = [
@@ -251,7 +252,7 @@ function ThresholdCard() {
         ariaLabel="Likes threshold"
       />
       <p className="mt-2.5 text-[10.5px] leading-snug text-text-muted">
-        <b className="text-text">{passing}</b> of 8 rows currently pass this filter.
+        <b className="text-text">{passing}</b> of {POSTS.length} rows currently pass this filter.
       </p>
     </div>
   );
@@ -389,10 +390,16 @@ function LimitCard() {
 export function CommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <p className="mb-3.5 rounded-xl border border-border bg-panel-2 p-2.5 text-[11.5px] leading-relaxed text-text-muted">
-        SQL doesn&apos;t run top to bottom. MySQL always executes these five clauses in a fixed order —
-        scrub the slider, press <b className="text-text">▶</b>, or click a clause to watch it happen.
-      </p>
+      <TheoryCard
+        goal="This query asks MySQL for a short, sorted list of the best-performing posts: keep only the ones with enough likes, drop the columns nobody asked for, arrange what's left, and hand back just the top few — like asking &ldquo;show me the 5 most-liked video posts.&rdquo; SQL doesn't run top to bottom: MySQL always executes these five clauses in the fixed order shown below. Scrub the slider, press ▶, or click a clause to watch it happen."
+        keywords={[
+          { term: "SELECT", note: GLOSSARY.SELECT },
+          { term: "FROM", note: GLOSSARY.FROM },
+          { term: "WHERE", note: GLOSSARY.WHERE },
+          { term: "ORDER BY", note: GLOSSARY["ORDER BY"] },
+          { term: "LIMIT", note: GLOSSARY.LIMIT },
+        ]}
+      />
       <SqlBlock />
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">

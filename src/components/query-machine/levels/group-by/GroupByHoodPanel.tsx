@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Table2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { aggLabel, GB_STAGES, groupRows } from "@/lib/groupByEngine";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,11 @@ export function GroupByHoodPanel() {
     bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [stage]);
 
+  const firstGroup = groups[0];
   const caption = [
-    "Every row from posts is still separate — nothing has been grouped yet.",
-    `Rows with the same ${groupCol} slide together into one bucket — watch them travel.`,
-    `Each bucket collapses to a single row: ${aggLabel(aggFn, metricCol)} computed per group.`,
+    `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
+    `Rows with the same ${groupCol} slide together into one bucket — watch them travel. e.g. every row where ${groupCol} = "${firstGroup?.key}" lands in the same bucket.`,
+    `Each bucket collapses to a single row: e.g. bucket "${firstGroup?.key}" has ${firstGroup?.rows.length} row${firstGroup?.rows.length === 1 ? "" : "s"}, so ${aggLabel(aggFn, metricCol)} = ${firstGroup?.value}.`,
   ][stage];
 
   return (
@@ -54,11 +55,27 @@ export function GroupByHoodPanel() {
         </motion.p>
 
         {!grouped ? (
-          <div className="flex flex-wrap gap-2">
-            {POSTS.map((row) => (
-              <RowChip key={row.id} row={row} dimmed={false} />
-            ))}
-          </div>
+          <>
+            <div className="mb-3 rounded-xl border border-border bg-panel p-3.5 shadow-[var(--shadow-row)]">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-mono text-[12.5px] font-bold">
+                  <Table2 className="h-3.5 w-3.5 text-text-muted" />
+                  FROM posts
+                </span>
+                <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap text-text-muted">
+                  Base table
+                </span>
+              </div>
+              <p className="mt-1.5 text-[10.5px] text-text-muted">
+                Loads every row from the table — {POSTS.length} rows read, still flat.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {POSTS.map((row) => (
+                <RowChip key={row.id} row={row} dimmed={false} />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="flex flex-col gap-3">
             {groups.map((g, i) => (
@@ -83,9 +100,10 @@ export function GroupByHoodPanel() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.5 }}
                         transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                        className="font-mono text-lg font-bold text-text"
+                        className="flex items-baseline gap-1.5 font-mono"
                       >
-                        {g.value}
+                        <span className="text-[9px] font-normal text-text-muted">{aggLabel(aggFn, metricCol)} =</span>
+                        <span className="text-lg font-bold text-text">{g.value}</span>
                       </motion.span>
                     )}
                   </AnimatePresence>

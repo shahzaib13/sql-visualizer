@@ -3,11 +3,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { AGG_FNS, GROUP_COLUMNS, METRIC_COLUMNS, aggLabel } from "@/lib/groupByEngine";
+import { AGG_FNS, GROUP_COLUMNS, groupRows, METRIC_COLUMNS, aggLabel } from "@/lib/groupByEngine";
 import { evaluateHaving, HAVING_OPS, HV_STAGES } from "@/lib/havingEngine";
+import { POSTS } from "@/lib/data";
+import { GLOSSARY } from "@/lib/glossary";
 import { cn } from "@/lib/utils";
 import { useHavingStore } from "@/store/useHavingStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
+import { TheoryCard } from "@/components/query-machine/TheoryCard";
 
 function useAutoPlay() {
   const isPlaying = useHavingStore((s) => s.isPlaying);
@@ -95,7 +98,7 @@ function StatusLine() {
   const passing = results.filter((r) => r.passes).length;
 
   const text = [
-    "FROM posts — 8 rows loaded, still flat",
+    `FROM posts — ${POSTS.length} rows loaded, still flat`,
     `GROUP BY ${groupCol} — collapsed into ${results.length} groups`,
     `HAVING ${aggLabel(aggFn, metricCol)} ${havingOp} ${havingValue} — ${passing} of ${results.length} groups survive`,
     `SELECT ${groupCol}, ${aggLabel(aggFn, metricCol)} — ${passing} row(s) returned`,
@@ -250,7 +253,11 @@ function HavingCard() {
   const metricCol = useHavingStore((s) => s.metricCol);
   const setHavingOp = useHavingStore((s) => s.setHavingOp);
   const setHavingValue = useHavingStore((s) => s.setHavingValue);
-  const maxVal = aggFn === "COUNT" ? 8 : aggFn === "SUM" ? 4500 : 1200;
+  const groupCol = useHavingStore((s) => s.groupCol);
+  // Derived from the actual data (not a guessed constant) so the slider's range
+  // always covers every group's value, whichever column/aggregate is picked.
+  const groupValues = groupRows(groupCol, metricCol, aggFn).map((g) => g.value);
+  const maxVal = Math.ceil(Math.max(...groupValues, 1) * 1.2);
 
   return (
     <div className="rounded-xl border-2 border-accent/40 bg-panel-2 p-3.5">
@@ -294,10 +301,14 @@ function HavingCard() {
 export function HavingCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <p className="mb-3.5 rounded-xl border border-border bg-panel-2 p-2.5 text-[11.5px] leading-relaxed text-text-muted">
-        HAVING runs <b className="text-text">after</b> GROUP BY — it can only test the aggregate value of a
-        group, never a raw column, which is why it needs its own clause instead of reusing WHERE.
-      </p>
+      <TheoryCard
+        goal="This query groups rows first, computes one number per group, and then throws away whole groups that don't meet a condition — like &ldquo;only show me usernames with more than 2 posts.&rdquo; HAVING runs after GROUP BY: it can only test the group's summary number, never a raw column, which is why it needs its own clause instead of reusing WHERE."
+        keywords={[
+          { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
+          { term: "HAVING", note: GLOSSARY.HAVING },
+          { term: "COUNT(*)", note: GLOSSARY["COUNT(*)"] },
+        ]}
+      />
       <SqlBlock />
       <ExecutionTimeline />
       <div className="mt-5 flex flex-col gap-3">

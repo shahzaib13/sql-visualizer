@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, Table2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { POSTS } from "@/lib/data";
 import { aggLabel } from "@/lib/groupByEngine";
@@ -28,11 +28,12 @@ export function HavingHoodPanel() {
   }, [stage]);
   const results = evaluateHaving(groupCol, metricCol, aggFn, havingOp, havingValue);
   const visibleResults = selected ? results.filter((r) => r.passes) : results;
+  const firstResult = results[0];
 
   const caption = [
-    "Every row from posts is still separate — nothing has been grouped yet.",
-    `Rows with the same ${groupCol} slide together into one bucket.`,
-    `HAVING checks each bucket's ${aggLabel(aggFn, metricCol)} against ${havingOp} ${havingValue} — failing buckets get rejected, not the rows inside them.`,
+    `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
+    `Rows with the same ${groupCol} slide together into one bucket — e.g. bucket "${firstResult?.key}" collapses to ${aggLabel(aggFn, metricCol)} = ${firstResult?.value}.`,
+    `HAVING checks each bucket's ${aggLabel(aggFn, metricCol)} against ${havingOp} ${havingValue} — e.g. bucket "${firstResult?.key}" has ${firstResult?.value}, so it ${firstResult?.passes ? "passes" : "fails"}. Failing buckets get rejected whole, not the rows inside them.`,
     "Rejected buckets are gone for good — SELECT only ever sees the survivors.",
   ][stage];
 
@@ -59,11 +60,27 @@ export function HavingHoodPanel() {
         </motion.p>
 
         {!grouped ? (
-          <div className="flex flex-wrap gap-2">
-            {POSTS.map((row) => (
-              <RowChip key={row.id} row={row} dimmed={false} layoutPrefix="hv-row" />
-            ))}
-          </div>
+          <>
+            <div className="mb-3 rounded-xl border border-border bg-panel p-3.5 shadow-[var(--shadow-row)]">
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-mono text-[12.5px] font-bold">
+                  <Table2 className="h-3.5 w-3.5 text-text-muted" />
+                  FROM posts
+                </span>
+                <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap text-text-muted">
+                  Base table
+                </span>
+              </div>
+              <p className="mt-1.5 text-[10.5px] text-text-muted">
+                Loads every row from the table — {POSTS.length} rows read, still flat.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {POSTS.map((row) => (
+                <RowChip key={row.id} row={row} dimmed={false} layoutPrefix="hv-row" />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="flex flex-col gap-3">
             <AnimatePresence>
@@ -92,7 +109,10 @@ export function HavingHoodPanel() {
                         {groupCol} = &quot;{g.key}&quot;
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-lg font-bold text-text">{g.value}</span>
+                        <span className="flex items-baseline gap-1.5 font-mono">
+                          <span className="text-[9px] font-normal text-text-muted">{aggLabel(aggFn, metricCol)} =</span>
+                          <span className="text-lg font-bold text-text">{g.value}</span>
+                        </span>
                         {evaluated && (
                           <motion.span
                             initial={{ scale: 0 }}
