@@ -1,8 +1,6 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Play, RotateCcw } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { AGG_FNS, GROUP_COLUMNS, groupRows, METRIC_COLUMNS, aggLabel } from "@/lib/groupByEngine";
 import { evaluateHaving, HAVING_OPS, HV_STAGES } from "@/lib/havingEngine";
 import { POSTS } from "@/lib/data";
@@ -12,25 +10,8 @@ import { useHavingStore } from "@/store/useHavingStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
 import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
-
-function useAutoPlay() {
-  const isPlaying = useHavingStore((s) => s.isPlaying);
-  const setPlaying = useHavingStore((s) => s.setPlaying);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (isPlaying) {
-      timer.current = setInterval(() => {
-        useHavingStore.setState((s) => ({ stage: (s.stage + 1) % HV_STAGES.length }));
-      }, 1600);
-    }
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [isPlaying]);
-
-  return { isPlaying, togglePlay: () => setPlaying(!isPlaying) };
-}
+import { ChallengeCard } from "@/components/query-machine/ChallengeCard";
+import { CopySqlButton } from "@/components/query-machine/CopySqlButton";
 
 function SqlBlock() {
   const stage = useHavingStore((s) => s.stage);
@@ -68,22 +49,33 @@ function SqlBlock() {
 
   const order: (typeof HV_STAGES)[number][] = ["SELECT", "FROM", "GROUP BY", "HAVING"];
 
+  const rawSql = `SELECT ${groupCol}, ${agg}
+FROM posts
+GROUP BY ${groupCol}
+HAVING ${agg} ${havingOp} ${havingValue};`;
+
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5 font-mono text-[12.5px] leading-[1.85]">
-      {order.map((clause, i) => (
-        <span key={clause}>
-          <span
-            onClick={() => setStage(HV_STAGES.indexOf(clause))}
-            className={cn(
-              "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
-              clause === activeName && "bg-accent/16",
-            )}
-          >
-            {parts[clause]}
+      <div className="mb-2.5 flex items-center justify-between border-b border-border pb-2">
+        <span className="text-[10px] font-bold tracking-wide text-text-muted uppercase">SQL Query</span>
+        <CopySqlButton sql={rawSql} />
+      </div>
+      <div>
+        {order.map((clause, i) => (
+          <span key={clause}>
+            <span
+              onClick={() => setStage(HV_STAGES.indexOf(clause))}
+              className={cn(
+                "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
+                clause === activeName && "bg-accent/16",
+              )}
+            >
+              {parts[clause]}
+            </span>
+            {i < order.length - 1 ? " " : ";"}
           </span>
-          {i < order.length - 1 ? " " : ";"}
-        </span>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -117,51 +109,28 @@ function StatusLine() {
 function ExecutionTimeline() {
   const stage = useHavingStore((s) => s.stage);
   const setStage = useHavingStore((s) => s.setStage);
-  const reset = useHavingStore((s) => s.reset);
-  const { isPlaying, togglePlay } = useAutoPlay();
 
   return (
     <div className="mt-5">
       <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-text-muted">Execution timeline</p>
-      <div className="flex items-center gap-2.5">
-        <div className="flex flex-none gap-1.5">
+      <div className="grid grid-cols-4 gap-1 rounded-lg border border-border bg-panel-2 p-1">
+        {HV_STAGES.map((s, i) => (
           <button
+            key={s}
             type="button"
-            onClick={reset}
-            title="Reset"
-            aria-label="Reset"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-border bg-panel-2 text-text transition-all hover:-translate-y-px hover:border-accent active:scale-90"
+            onClick={() => setStage(i)}
+            className={cn(
+              "rounded-md py-1.5 text-center font-mono text-[10.5px] font-semibold tracking-wide transition-colors",
+              i === stage ? "bg-accent text-accent-ink shadow-xs" : "text-text-muted hover:text-text",
+            )}
           >
-            <RotateCcw className="h-[13px] w-[13px]" />
+            {s}
           </button>
-          <motion.button
-            type="button"
-            onClick={togglePlay}
-            title="Play"
-            aria-label="Play through stages"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-accent bg-accent text-accent-ink active:scale-90"
-            animate={isPlaying ? { boxShadow: ["0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent)", "0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent)"] } : {}}
-            transition={isPlaying ? { duration: 1.6, repeat: Infinity } : {}}
-          >
-            <Play className="h-[13px] w-[13px]" />
-          </motion.button>
-        </div>
-        <div className="grid min-w-0 flex-1 grid-cols-4">
-          {HV_STAGES.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStage(i)}
-              className={cn(
-                "rounded-md px-1 py-2 text-center font-mono text-[10px] font-semibold tracking-wide text-text-muted transition-colors hover:text-text",
-                i === stage && "bg-accent/12 text-accent",
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
+      <p className="mt-2 text-[10.5px] text-text-muted">
+        Click any stage above to watch groups filter by aggregate condition
+      </p>
       <StatusLine />
     </div>
   );
@@ -303,7 +272,7 @@ export function HavingCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
       <TheoryCard
-        goal="This query groups rows first, computes one number per group, and then throws away whole groups that don't meet a condition — like &ldquo;only show me usernames with more than 2 posts.&rdquo; HAVING runs after GROUP BY: it can only test the group's summary number, never a raw column, which is why it needs its own clause instead of reusing WHERE."
+        goal="Think of a librarian inspecting the filled genre bins: only bins holding at least 3 books are kept for the display cart, while sparse bins get wheeled away. HAVING runs strictly after GROUP BY — WHERE inspects individual index cards before binning, but HAVING inspects the summarized bins after tallying."
         keywords={[
           { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
           { term: "HAVING", note: GLOSSARY.HAVING },
@@ -312,10 +281,13 @@ export function HavingCommandPanel() {
       />
       <SqlBlock />
       <ExecutionTimeline />
-      <div className="mt-5 flex flex-col gap-3">
+      <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">
         <GroupByColumnCard />
         <AggregateCard />
         <HavingCard />
+      </div>
+      <div className="mt-3 flex flex-col gap-3">
+        <ChallengeCard level="having" />
         <QuizCard level="having" />
       </div>
     </div>

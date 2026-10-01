@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from "react-resizable-panels";
+import type { ReactNode } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useMediaQuery } from "@/lib/useMediaQuery";
-import { useAppStore } from "@/store/useAppStore";
 
 function ResizeHandle() {
   return (
@@ -30,56 +29,39 @@ interface ResizableShellProps {
 }
 
 function DesktopShell({ layoutId, command, hood, output }: ResizableShellProps) {
-  const hoodOpen = useAppStore((s) => s.hoodOpen);
-  const hoodPanelRef = useRef<ImperativePanelHandle>(null);
-
-  useEffect(() => {
-    const panel = hoodPanelRef.current;
-    if (!panel) return;
-    if (hoodOpen && panel.isCollapsed()) panel.expand();
-    if (!hoodOpen && !panel.isCollapsed()) panel.collapse();
-  }, [hoodOpen]);
-
   return (
     <PanelGroup direction="horizontal" className="h-full!" autoSaveId={layoutId}>
-      <Panel defaultSize={28} minSize={22} maxSize={42} className="flex flex-col bg-panel">
-        {command}
+      <Panel defaultSize={28} minSize={20} maxSize={42} className="flex flex-col min-h-0 overflow-hidden bg-panel">
+        <div id="tour-command-panel" className="flex h-full flex-col min-h-0">
+          {command}
+        </div>
       </Panel>
 
       <ResizeHandle />
 
-      <Panel
-        ref={hoodPanelRef}
-        collapsible
-        collapsedSize={0}
-        minSize={0}
-        defaultSize={40}
-        className="bg-panel"
-        onCollapse={() => useAppStore.setState({ hoodOpen: false })}
-        onExpand={() => useAppStore.setState({ hoodOpen: true })}
-      >
-        {hood}
+      <Panel defaultSize={42} minSize={25} maxSize={60} className="flex flex-col min-h-0 overflow-hidden bg-panel">
+        <div id="tour-hood-panel" className="flex h-full flex-col min-h-0">
+          {hood}
+        </div>
       </Panel>
 
       <ResizeHandle />
 
-      <Panel defaultSize={32} minSize={22} maxSize={45} className="flex flex-col bg-panel">
-        {output}
+      <Panel defaultSize={30} minSize={20} maxSize={45} className="flex flex-col min-h-0 overflow-hidden bg-panel">
+        <div id="tour-output-panel" className="flex h-full flex-col min-h-0">
+          {output}
+        </div>
       </Panel>
     </PanelGroup>
   );
 }
 
 function MobileShell({ command, hood, output }: ResizableShellProps) {
-  const hoodOpen = useAppStore((s) => s.hoodOpen);
-
   return (
     <div className="scrollbar-thin flex h-full flex-col overflow-y-auto">
-      <section className="flex max-h-[85vh] flex-col border-b border-border bg-panel">{command}</section>
-      {hoodOpen && (
-        <section className="flex max-h-[85vh] flex-col border-b border-border bg-panel">{hood}</section>
-      )}
-      <section className="flex max-h-[85vh] flex-col bg-panel">{output}</section>
+      <section id="tour-command-panel-mobile" className="flex max-h-[85vh] flex-col border-b border-border bg-panel">{command}</section>
+      <section id="tour-hood-panel-mobile" className="flex max-h-[85vh] flex-col border-b border-border bg-panel">{hood}</section>
+      <section id="tour-output-panel-mobile" className="flex max-h-[85vh] flex-col bg-panel">{output}</section>
     </div>
   );
 }

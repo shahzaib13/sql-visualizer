@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Minus, Pause, Play, Plus, RotateCcw } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Minus, Plus } from "lucide-react";
 import { ORDERABLE_COLUMNS, POSTS, TOGGLE_COLUMNS } from "@/lib/data";
 import { GLOSSARY } from "@/lib/glossary";
 import { passingCount, selectColsText, STAGES } from "@/lib/queryEngine";
@@ -10,30 +9,13 @@ import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
 import { SliderWithBubble } from "@/components/ui/SliderWithBubble";
 import { Term } from "@/components/ui/Term";
+import { ChallengeCard } from "./ChallengeCard";
+import { CopySqlButton } from "./CopySqlButton";
 import { QuizCard } from "./QuizCard";
 import { TheoryCard } from "./TheoryCard";
 
 const CLAUSE_ORDER = ["SELECT", "FROM", "WHERE", "ORDER BY", "LIMIT"] as const;
 const EXEC_NO: Record<string, number> = { SELECT: 3, FROM: 1, WHERE: 2, "ORDER BY": 4, LIMIT: 5 };
-
-function useAutoPlay() {
-  const isPlaying = useQueryStore((s) => s.isPlaying);
-  const setPlaying = useQueryStore((s) => s.setPlaying);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (isPlaying) {
-      timer.current = setInterval(() => {
-        useQueryStore.setState((s) => ({ stage: (s.stage + 1) % STAGES.length }));
-      }, 1600);
-    }
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [isPlaying]);
-
-  return { isPlaying, togglePlay: () => setPlaying(!isPlaying) };
-}
 
 function StatusLine() {
   const stage = useQueryStore((s) => s.stage);
@@ -128,24 +110,36 @@ function SqlBlock() {
     ),
   };
 
+  const rawSql = `SELECT ${selectColsText(selectedCols)}
+FROM posts
+WHERE likes_count > ${threshold}
+ORDER BY ${orderCol} ${orderDir}
+LIMIT ${limit};`;
+
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5 font-mono text-[12.5px] leading-[1.85]">
-      {CLAUSE_ORDER.map((clause, i) => (
-        <span key={clause}>
-          <motion.span
-            onClick={() => setStage(STAGES.indexOf(clause as (typeof STAGES)[number]))}
-            className={cn(
-              "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
-              clause === activeName && "bg-accent/16",
-            )}
-            animate={clause === activeName ? { backgroundColor: ["color-mix(in srgb, var(--accent) 55%, transparent)", "color-mix(in srgb, var(--accent) 16%, transparent)"] } : {}}
-            transition={{ duration: 0.48 }}
-          >
-            {parts[clause]}
-          </motion.span>
-          {i < CLAUSE_ORDER.length - 1 ? " " : ";"}
-        </span>
-      ))}
+      <div className="mb-2.5 flex items-center justify-between border-b border-border pb-2">
+        <span className="text-[10px] font-bold tracking-wide text-text-muted uppercase">SQL Query</span>
+        <CopySqlButton sql={rawSql} />
+      </div>
+      <div>
+        {CLAUSE_ORDER.map((clause, i) => (
+          <span key={clause}>
+            <motion.span
+              onClick={() => setStage(STAGES.indexOf(clause as (typeof STAGES)[number]))}
+              className={cn(
+                "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
+                clause === activeName && "bg-accent/16",
+              )}
+              animate={clause === activeName ? { backgroundColor: ["color-mix(in srgb, var(--accent) 55%, transparent)", "color-mix(in srgb, var(--accent) 16%, transparent)"] } : {}}
+              transition={{ duration: 0.48 }}
+            >
+              {parts[clause]}
+            </motion.span>
+            {i < CLAUSE_ORDER.length - 1 ? " " : ";"}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -153,48 +147,22 @@ function SqlBlock() {
 function ExecutionTimeline() {
   const stage = useQueryStore((s) => s.stage);
   const setStage = useQueryStore((s) => s.setStage);
-  const reset = useQueryStore((s) => s.reset);
-  const { isPlaying, togglePlay } = useAutoPlay();
 
   return (
     <div className="mt-5">
       <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-text-muted">
         Execution timeline
       </p>
-      <div className="flex items-center gap-2.5">
-        <div className="flex flex-none gap-1.5">
-          <button
-            type="button"
-            onClick={reset}
-            title="Reset"
-            aria-label="Reset"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-border bg-panel-2 text-text transition-all hover:-translate-y-px hover:border-accent active:scale-90"
-          >
-            <RotateCcw className="h-[13px] w-[13px]" />
-          </button>
-          <motion.button
-            type="button"
-            onClick={togglePlay}
-            title="Play"
-            aria-label="Play through stages"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-accent bg-accent text-accent-ink active:scale-90"
-            animate={isPlaying ? { boxShadow: ["0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent)", "0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent)"] } : {}}
-            transition={isPlaying ? { duration: 1.6, repeat: Infinity } : {}}
-          >
-            {isPlaying ? <Pause className="h-[13px] w-[13px]" /> : <Play className="h-[13px] w-[13px]" />}
-          </motion.button>
-        </div>
-        <div className="min-w-0 flex-1">
-          <SliderWithBubble
-            value={stage}
-            min={0}
-            max={STAGES.length - 1}
-            onChange={setStage}
-            formatBubble={(v) => STAGES[v]}
-            ariaLabel="Execution stage"
-            persistBubble
-          />
-        </div>
+      <div className="min-w-0">
+        <SliderWithBubble
+          value={stage}
+          min={0}
+          max={STAGES.length - 1}
+          onChange={setStage}
+          formatBubble={(v) => STAGES[v]}
+          ariaLabel="Execution stage"
+          persistBubble
+        />
       </div>
 
       <div className="mt-2.5 grid grid-cols-5">
@@ -212,8 +180,8 @@ function ExecutionTimeline() {
           </button>
         ))}
       </div>
-      <p className="mt-2.5 text-[11px] text-text-muted">
-        drag the handle, click a tick, or press play — the panes on the right follow along
+      <p className="mt-2 text-[10.5px] text-text-muted">
+        Drag the slider or click any clause above to trace query execution step-by-step
       </p>
       <StatusLine />
     </div>
@@ -392,7 +360,7 @@ export function CommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
       <TheoryCard
-        goal="This query asks MySQL for a short, sorted list of the best-performing posts: keep only the ones with enough likes, drop the columns nobody asked for, arrange what's left, and hand back just the top few — like asking &ldquo;show me the 5 most-liked video posts.&rdquo; SQL doesn't run top to bottom: MySQL always executes these five clauses in the fixed order shown below. Scrub the slider, press ▶, or click a clause to watch it happen."
+        goal="Library Analogy: Think of MySQL like visiting a vast library. FROM is finding the right bookshelf ('posts'). WHERE is the librarian tossing out books that don't meet your criteria before you read them. SELECT is pulling the exact fields you asked for. ORDER BY stacks the remaining books by popularity, and LIMIT is carrying home only the top few."
         keywords={[
           { term: "SELECT", note: GLOSSARY.SELECT },
           { term: "FROM", note: GLOSSARY.FROM },
@@ -403,12 +371,15 @@ export function CommandPanel() {
       />
       <SqlBlock />
       <ExecutionTimeline />
-      <div className="mt-5 flex flex-col gap-3">
+      <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">
         <ThresholdCard />
         <SelectColumnsCard />
         <OrderByCard />
         <LimitCard />
+      </div>
+      <div className="mt-3 flex flex-col gap-3">
         <QuizCard level="filter" />
+        <ChallengeCard level="filter" />
       </div>
     </div>
   );

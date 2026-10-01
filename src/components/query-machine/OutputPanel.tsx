@@ -108,26 +108,26 @@ function OutputRow({ id }: { id: number }) {
         opacity: info.kind === "excluded" || info.kind === "cut" ? 0.7 : 1,
       }}
       className={cn(
-        "flex items-center gap-2.5 rounded-md border border-border border-l-[3px] bg-panel px-2.5 py-2 shadow-[var(--shadow-row)]",
+        "flex items-center gap-2 rounded-md border border-border border-l-[3px] bg-panel px-2.5 py-1.5 shadow-[var(--shadow-row)] text-[11.5px]",
         KIND_BORDER[info.kind],
       )}
     >
-      <span className="w-5 flex-none font-mono text-[10px] text-text-muted">
+      <span className="w-4 flex-none font-mono text-[10px] text-text-muted">
         {String(row.id).padStart(2, "0")}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold">{row.username}</span>
+      <span className="min-w-0 flex-1 truncate font-semibold text-text">{row.username}</span>
       <span
         className={cn(
-          "w-[42px] flex-none truncate font-mono text-[10.5px] text-text-muted transition-opacity",
+          "w-12 flex-none text-center truncate font-mono text-[10px] text-text-muted transition-opacity",
           !kept("format") && "text-text-muted/35 line-through",
         )}
       >
         {row.format}
       </span>
-      <span className="flex flex-none gap-2.5 font-mono text-[11px]">
+      <span className="flex flex-none gap-2 font-mono text-[10.5px]">
         <span
           className={cn(
-            "flex items-center gap-1 text-bad transition-opacity",
+            "flex w-10 items-center justify-end gap-0.5 text-bad transition-opacity",
             !kept("likes_count") && "text-text-muted/35 line-through",
           )}
         >
@@ -136,7 +136,7 @@ function OutputRow({ id }: { id: number }) {
         </span>
         <span
           className={cn(
-            "flex items-center gap-1 text-flow transition-opacity",
+            "flex w-11 items-center justify-end gap-0.5 text-flow transition-opacity",
             !kept("views_count") && "text-text-muted/35 line-through",
           )}
         >
@@ -168,34 +168,36 @@ function SourceTable() {
       </p>
       <SchemaCard tableName="posts" columns={SCHEMA} />
 
-      <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
-        <span className="w-5 flex-none">id</span>
-        <span className="min-w-0 flex-1">user</span>
-        <span className="w-[46px] flex-none">format</span>
-        <span className="w-[38px] flex-none">likes</span>
-        <span className="w-[42px] flex-none">views</span>
-      </div>
-      <div className="mt-1.5 flex flex-col gap-2">
-        {POSTS.map((row) => (
-          <div
-            key={row.id}
-            className="flex items-center gap-2.5 rounded-md border border-border bg-panel px-2.5 py-2 shadow-[var(--shadow-row)]"
-          >
-            <span className="w-5 flex-none font-mono text-[10px] text-text-muted">
-              {String(row.id).padStart(2, "0")}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-[12.5px] font-semibold">{row.username}</span>
-            <span className="w-[46px] flex-none font-mono text-[10.5px] text-text-muted">{row.format}</span>
-            <span className="flex w-[38px] flex-none items-center gap-1 font-mono text-[11px] text-bad">
-              <Heart className="h-2.5 w-2.5" fill="currentColor" strokeWidth={0} />
-              {row.likes_count}
-            </span>
-            <span className="flex w-[42px] flex-none items-center gap-1 font-mono text-[11px] text-flow">
-              <Eye className="h-2.5 w-2.5" />
-              {row.views_count}
-            </span>
-          </div>
-        ))}
+      <div className="w-full min-w-0 pb-2">
+        <div className="mt-3.5 flex items-center gap-2 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+          <span className="w-4 flex-none">id</span>
+          <span className="min-w-0 flex-1 truncate">user</span>
+          <span className="w-12 flex-none text-center">format</span>
+          <span className="w-10 flex-none text-right">likes</span>
+          <span className="w-11 flex-none text-right">views</span>
+        </div>
+        <div className="mt-1.5 flex flex-col gap-1.5">
+          {POSTS.map((row) => (
+            <div
+              key={row.id}
+              className="flex items-center gap-2 rounded-md border border-border bg-panel px-2.5 py-1.5 shadow-[var(--shadow-row)] text-[11.5px]"
+            >
+              <span className="w-4 flex-none font-mono text-[10px] text-text-muted">
+                {String(row.id).padStart(2, "0")}
+              </span>
+              <span className="min-w-0 flex-1 truncate font-semibold text-text">{row.username}</span>
+              <span className="w-12 flex-none text-center font-mono text-[10px] text-text-muted">{row.format}</span>
+              <span className="flex w-10 flex-none items-center justify-end gap-0.5 font-mono text-[10.5px] text-bad font-semibold">
+                <Heart className="h-2.5 w-2.5 fill-current" strokeWidth={0} />
+                {row.likes_count}
+              </span>
+              <span className="flex w-11 flex-none items-center justify-end gap-0.5 font-mono text-[10.5px] text-flow font-semibold">
+                <Eye className="h-2.5 w-2.5" />
+                {row.views_count}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -263,8 +265,8 @@ export function OutputPanel() {
                 refs.current[f.key] = el;
               }}
               className={cn(
-                "relative z-10 rounded-md px-2.5 py-1.5 text-[11px] font-semibold whitespace-nowrap text-text-muted transition-colors",
-                filter === f.key && "text-accent-ink",
+                "relative z-10 flex-1 min-w-0 rounded-md px-1 sm:px-2 py-1.5 text-[11px] font-semibold text-center truncate transition-colors",
+                filter === f.key ? "text-accent-ink" : "text-text-muted hover:text-text",
               )}
             >
               {f.label}
@@ -280,37 +282,39 @@ export function OutputPanel() {
         </span>
       </div>
 
-      {visibleIds.length > 0 && (
-        <div className="mt-3.5 flex items-center gap-2.5 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
-          <span className="w-5 flex-none">id</span>
-          <span className="min-w-0 flex-1">user</span>
-          <span className="w-[42px] flex-none">
-            <Term term="format">format</Term>
-          </span>
-          <span className="flex flex-none gap-2.5">
-            <span className="flex items-center gap-1 w-[38px]">
-              <Term term="likes_count">likes</Term>
+      <div className="w-full min-w-0 pb-2">
+        {visibleIds.length > 0 && (
+          <div className="mt-3.5 flex items-center gap-2 px-2.5 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+            <span className="w-4 flex-none">id</span>
+            <span className="min-w-0 flex-1 truncate">user</span>
+            <span className="w-12 flex-none text-center">
+              <Term term="format">format</Term>
             </span>
-            <span className="flex items-center gap-1 w-[42px]">
-              <Term term="views_count">views</Term>
+            <span className="flex flex-none gap-2">
+              <span className="flex items-center justify-end w-10">
+                <Term term="likes_count">likes</Term>
+              </span>
+              <span className="flex items-center justify-end w-11">
+                <Term term="views_count">views</Term>
+              </span>
             </span>
-          </span>
-          <span className="w-[62px] flex-none">status</span>
+            <span className="w-14 flex-none text-right">status</span>
+          </div>
+        )}
+        <div className="mt-1.5 flex flex-col gap-1.5">
+          <AnimatePresence mode="popLayout">
+            {visibleIds.map((id) => (
+              <OutputRow key={id} id={id} />
+            ))}
+          </AnimatePresence>
         </div>
-      )}
-      <div className="mt-1.5 flex flex-col gap-2">
-        <AnimatePresence mode="popLayout">
-          {visibleIds.map((id) => (
-            <OutputRow key={id} id={id} />
-          ))}
-        </AnimatePresence>
-      </div>
 
-      {visibleIds.length === 0 && (
-        <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
-          No rows in this view yet — drag the pipeline slider.
-        </p>
-      )}
+        {visibleIds.length === 0 && (
+          <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
+            No rows in this view yet — drag the pipeline slider.
+          </p>
+        )}
+      </div>
         </>
       )}
 

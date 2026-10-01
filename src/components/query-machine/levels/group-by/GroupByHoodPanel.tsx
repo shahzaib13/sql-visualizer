@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Table2 } from "lucide-react";
+import { Check, Layers, Table2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { aggLabel, GB_STAGES, groupRows } from "@/lib/groupByEngine";
 import { cn } from "@/lib/utils";
@@ -77,44 +77,85 @@ export function GroupByHoodPanel() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col gap-3">
-            {groups.map((g, i) => (
-              <motion.div
-                key={g.key}
-                layout
-                className="rounded-2xl border-2 p-3"
-                style={{ borderColor: BUCKET_COLORS[i % BUCKET_COLORS.length] }}
-              >
-                <div className="mb-2.5 flex items-center justify-between gap-2">
-                  <span
-                    className="rounded-full px-2.5 py-1 font-mono text-[11px] font-bold text-white"
-                    style={{ backgroundColor: BUCKET_COLORS[i % BUCKET_COLORS.length] }}
+          <div className="flex flex-col gap-4">
+            {groups.map((g, i) => {
+              const bucketColor = BUCKET_COLORS[i % BUCKET_COLORS.length];
+              return (
+                <motion.div
+                  key={g.key}
+                  layout
+                  className="relative overflow-hidden rounded-2xl border-2 bg-panel shadow-sm transition-all"
+                  style={{ borderColor: bucketColor }}
+                >
+                  {/* Bucket Top Rim / Opening */}
+                  <div
+                    className="flex items-center justify-between px-3.5 py-2.5"
+                    style={{ backgroundColor: `color-mix(in srgb, ${bucketColor} 12%, var(--panel))` }}
                   >
-                    {groupCol} = &quot;{g.key}&quot;
-                  </span>
-                  <AnimatePresence>
-                    {computed && (
-                      <motion.span
-                        key={`${g.key}-${g.value}`}
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.5 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                        className="flex items-baseline gap-1.5 font-mono"
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="grid h-6 w-6 place-items-center rounded-lg text-white shadow-xs"
+                        style={{ backgroundColor: bucketColor }}
                       >
-                        <span className="text-[9px] font-normal text-text-muted">{aggLabel(aggFn, metricCol)} =</span>
-                        <span className="text-lg font-bold text-text">{g.value}</span>
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <div className={cn("flex flex-wrap gap-2 transition-all", computed && "opacity-70")}>
-                  {g.rows.map((row) => (
-                    <RowChip key={row.id} row={row} dimmed={computed} />
-                  ))}
-                </div>
-              </motion.div>
-            ))}
+                        <Layers className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="font-mono text-[12px] font-bold text-text">
+                        {groupCol} = &quot;{g.key}&quot;
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-border bg-panel px-2 py-0.5 font-mono text-[9.5px] font-bold text-text-muted">
+                        {g.rows.length} rows collected
+                      </span>
+
+                      <AnimatePresence>
+                        {computed && (
+                          <motion.span
+                            key={`${g.key}-${g.value}`}
+                            initial={{ opacity: 0, scale: 0.5, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.5 }}
+                            transition={{ type: "spring", stiffness: 450, damping: 20 }}
+                            className="flex items-baseline gap-1 rounded-md bg-panel px-2 py-0.5 font-mono shadow-xs border border-border"
+                          >
+                            <span className="text-[9px] text-text-muted">{aggLabel(aggFn, metricCol)}:</span>
+                            <span className="text-[13px] font-bold text-accent">{g.value}</span>
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Physics Drop Slit */}
+                  <div
+                    className="h-1 w-full opacity-60"
+                    style={{ backgroundColor: bucketColor }}
+                  />
+
+                  {/* Bucket Interior: Rows fall into the basket */}
+                  <div className="p-3.5">
+                    <div className={cn("flex flex-wrap gap-2 transition-opacity", computed && "opacity-75")}>
+                      {g.rows.map((row, ri) => (
+                        <motion.div
+                          key={row.id}
+                          initial={{ y: -30, opacity: 0, scale: 0.8 }}
+                          animate={{ y: 0, opacity: 1, scale: 1 }}
+                          transition={{
+                            delay: ri * 0.035,
+                            type: "spring",
+                            stiffness: 360,
+                            damping: 22,
+                          }}
+                        >
+                          <RowChip row={row} dimmed={computed} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

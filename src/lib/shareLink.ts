@@ -1,3 +1,4 @@
+import { useAggregatesStore } from "@/store/useAggregatesStore";
 import { useAppStore, type LevelId } from "@/store/useAppStore";
 import { useGroupByStore } from "@/store/useGroupByStore";
 import { useHavingStore } from "@/store/useHavingStore";
@@ -10,6 +11,7 @@ import { useSubqueryStore } from "@/store/useSubqueryStore";
 // shared link carries only the tunable knobs, never stale/dead store fields.
 const SHAREABLE_FIELDS: Record<LevelId, readonly string[]> = {
   filter: ["stage", "threshold", "selectedCols", "orderCol", "orderDir", "limit", "simIndex", "filter"],
+  aggregates: ["stage", "func", "numericCol", "distinctCol", "countMode"],
   "group-by": ["stage", "groupCol", "metricCol", "aggFn"],
   having: ["stage", "groupCol", "metricCol", "aggFn", "havingOp", "havingValue"],
   join: ["stage", "joinType"],
@@ -19,6 +21,7 @@ const SHAREABLE_FIELDS: Record<LevelId, readonly string[]> = {
 
 const STORE_BY_LEVEL: Record<LevelId, { getState: () => object; setState: (s: object) => void }> = {
   filter: useQueryStore,
+  aggregates: useAggregatesStore,
   "group-by": useGroupByStore,
   having: useHavingStore,
   join: useJoinStore,

@@ -1,8 +1,6 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Play, RotateCcw } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { AGG_FNS, GB_STAGES, GROUP_COLUMNS, METRIC_COLUMNS, aggLabel, groupRows } from "@/lib/groupByEngine";
 import { POSTS } from "@/lib/data";
 import { GLOSSARY } from "@/lib/glossary";
@@ -10,25 +8,8 @@ import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
 import { QuizCard } from "@/components/query-machine/QuizCard";
 import { TheoryCard } from "@/components/query-machine/TheoryCard";
-
-function useAutoPlay() {
-  const isPlaying = useGroupByStore((s) => s.isPlaying);
-  const setPlaying = useGroupByStore((s) => s.setPlaying);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (isPlaying) {
-      timer.current = setInterval(() => {
-        useGroupByStore.setState((s) => ({ stage: (s.stage + 1) % GB_STAGES.length }));
-      }, 1600);
-    }
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [isPlaying]);
-
-  return { isPlaying, togglePlay: () => setPlaying(!isPlaying) };
-}
+import { ChallengeCard } from "@/components/query-machine/ChallengeCard";
+import { CopySqlButton } from "@/components/query-machine/CopySqlButton";
 
 function SqlBlock() {
   const stage = useGroupByStore((s) => s.stage);
@@ -60,22 +41,32 @@ function SqlBlock() {
 
   const order: (typeof GB_STAGES)[number][] = ["SELECT", "FROM", "GROUP BY"];
 
+  const rawSql = `SELECT ${groupCol}, ${agg} AS value
+FROM posts
+GROUP BY ${groupCol};`;
+
   return (
     <div className="rounded-xl border border-border bg-panel-2 p-3.5 font-mono text-[12.5px] leading-[1.85]">
-      {order.map((clause, i) => (
-        <span key={clause}>
-          <span
-            onClick={() => setStage(GB_STAGES.indexOf(clause))}
-            className={cn(
-              "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
-              clause === activeName && "bg-accent/16",
-            )}
-          >
-            {parts[clause]}
+      <div className="mb-2.5 flex items-center justify-between border-b border-border pb-2">
+        <span className="text-[10px] font-bold tracking-wide text-text-muted uppercase">SQL Query</span>
+        <CopySqlButton sql={rawSql} />
+      </div>
+      <div>
+        {order.map((clause, i) => (
+          <span key={clause}>
+            <span
+              onClick={() => setStage(GB_STAGES.indexOf(clause))}
+              className={cn(
+                "-my-px -mx-[3px] cursor-pointer rounded px-[3px] py-px transition-colors hover:bg-border",
+                clause === activeName && "bg-accent/16",
+              )}
+            >
+              {parts[clause]}
+            </span>
+            {i < order.length - 1 ? " " : ";"}
           </span>
-          {i < order.length - 1 ? " " : ";"}
-        </span>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -105,51 +96,28 @@ function StatusLine() {
 function ExecutionTimeline() {
   const stage = useGroupByStore((s) => s.stage);
   const setStage = useGroupByStore((s) => s.setStage);
-  const reset = useGroupByStore((s) => s.reset);
-  const { isPlaying, togglePlay } = useAutoPlay();
 
   return (
     <div className="mt-5">
       <p className="mb-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-text-muted">Execution timeline</p>
-      <div className="flex items-center gap-2.5">
-        <div className="flex flex-none gap-1.5">
+      <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-panel-2 p-1">
+        {GB_STAGES.map((s, i) => (
           <button
+            key={s}
             type="button"
-            onClick={reset}
-            title="Reset"
-            aria-label="Reset"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-border bg-panel-2 text-text transition-all hover:-translate-y-px hover:border-accent active:scale-90"
+            onClick={() => setStage(i)}
+            className={cn(
+              "rounded-md py-1.5 text-center font-mono text-[11px] font-semibold tracking-wide transition-colors",
+              i === stage ? "bg-accent text-accent-ink shadow-xs" : "text-text-muted hover:text-text",
+            )}
           >
-            <RotateCcw className="h-[13px] w-[13px]" />
+            {s}
           </button>
-          <motion.button
-            type="button"
-            onClick={togglePlay}
-            title="Play"
-            aria-label="Play through stages"
-            className="grid h-8 w-8 flex-none place-items-center rounded-full border border-accent bg-accent text-accent-ink active:scale-90"
-            animate={isPlaying ? { boxShadow: ["0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent)", "0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent)"] } : {}}
-            transition={isPlaying ? { duration: 1.6, repeat: Infinity } : {}}
-          >
-            <Play className="h-[13px] w-[13px]" />
-          </motion.button>
-        </div>
-        <div className="grid min-w-0 flex-1 grid-cols-3">
-          {GB_STAGES.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setStage(i)}
-              className={cn(
-                "rounded-md px-1 py-2 text-center font-mono text-[10.5px] font-semibold tracking-wide text-text-muted transition-colors hover:text-text",
-                i === stage && "bg-accent/12 text-accent",
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
+      <p className="mt-2 text-[10.5px] text-text-muted">
+        Click any stage above to watch rows group and aggregate
+      </p>
       <StatusLine />
     </div>
   );
@@ -248,7 +216,7 @@ export function GroupByCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
       <TheoryCard
-        goal="This query stops looking at posts one row at a time. Instead it sorts every row into buckets that share the same value — for example, every image post in one bucket and every video post in another — and then calculates a single summary number for each bucket, like &ldquo;how many posts are in this bucket?&rdquo; GROUP BY runs before SELECT: MySQL first builds the buckets, then computes one value per bucket."
+        goal="Library Analogy: In our library, GROUP BY is sorting books into different piles by category (e.g. by format: image vs video). Once sorted into distinct piles, aggregate functions like COUNT() or AVG() calculate one summary number for each pile, rather than for each individual book."
         keywords={[
           { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
           { term: "COUNT(*)", note: GLOSSARY["COUNT(*)"] },
@@ -258,10 +226,13 @@ export function GroupByCommandPanel() {
       />
       <SqlBlock />
       <ExecutionTimeline />
-      <div className="mt-5 flex flex-col gap-3">
+      <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">
         <GroupByColumnCard />
         <AggregateCard />
+      </div>
+      <div className="mt-3 flex flex-col gap-3">
         <QuizCard level="group-by" />
+        <ChallengeCard level="group-by" />
       </div>
     </div>
   );

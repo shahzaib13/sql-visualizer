@@ -20,27 +20,13 @@ export const metadata: Metadata = {
     "An interactive workbench that steps SQL queries through MySQL's real execution order, one clause at a time — from WHERE and GROUP BY through JOIN, set operations, and subqueries.",
 };
 
-const THEME_INIT_SCRIPT = `
-(function () {
-  try {
-    var stored = localStorage.getItem("qm-theme");
-    var dark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", dark);
-  } catch (e) {}
-})();
-`;
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
-      suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
-      <body className="min-h-full flex flex-col overflow-hidden" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col overflow-hidden">
         {children}
       </body>
     </html>

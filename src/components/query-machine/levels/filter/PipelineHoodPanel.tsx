@@ -136,13 +136,38 @@ export function PipelineHoodPanel() {
 
   // Follow the command panel's stage — without this the active node can be
   // scrolled off-screen and a control change looks like it did nothing.
+  const bodyRef = useRef<HTMLDivElement>(null);
   const isFirstRun = useRef(true);
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
       return;
     }
-    document.getElementById(`hood-node-${stage + 1}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    const scrollToStage = () => {
+      const container = bodyRef.current;
+      if (!container) return;
+
+      if (stage === 0) {
+        container.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      const target = document.getElementById(`hood-node-${stage + 1}`);
+      if (!target) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const targetTop = targetRect.top - containerRect.top + container.scrollTop;
+
+      container.scrollTo({
+        top: Math.max(0, targetTop - 20),
+        behavior: "smooth",
+      });
+    };
+
+    const timer = setTimeout(scrollToStage, 40);
+    return () => clearTimeout(timer);
   }, [stage]);
 
   return (
@@ -154,7 +179,7 @@ export function PipelineHoodPanel() {
         </span>
       </div>
 
-      <div className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
+      <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
           Query parsed — 5 clauses recognised

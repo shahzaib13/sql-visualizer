@@ -1,83 +1,83 @@
 "use client";
 
-import * as Switch from "@radix-ui/react-switch";
 import { motion } from "framer-motion";
-import { Check, Cog, Link2, Moon, Sun } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Check, Cog, Compass, Link2 } from "lucide-react";
+import { useState } from "react";
 import { buildShareUrl } from "@/lib/shareLink";
 import { cn } from "@/lib/utils";
 import { LEVELS, useAppStore } from "@/store/useAppStore";
 import { useProgressStore } from "@/store/useProgressStore";
 
-function useTheme() {
-  // Starts null on purpose: the server can't know the client's theme, and the inline
-  // head script already applied the right class before paint, so this only syncs
-  // React's copy of that value post-mount — it never causes a visible flash.
-  const [dark, setDark] = useState<boolean | null>(null);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only DOM state, must run post-mount to avoid an SSR mismatch
-    setDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  const toggle = () => {
-    setDark((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle("dark", next);
-      localStorage.setItem("qm-theme", next ? "dark" : "light");
-      return next;
-    });
-  };
-
-  return { dark, toggle };
-}
-
-function LevelNav() {
+function JourneyMap() {
   const currentLevel = useAppStore((s) => s.currentLevel);
   const setLevel = useAppStore((s) => s.setLevel);
   const quizPassed = useProgressStore((s) => s.quizPassed);
-  const refs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-
-  useEffect(() => {
-    const el = refs.current[currentLevel];
-    if (el) setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
-  }, [currentLevel]);
+  const visited = useProgressStore((s) => s.visited);
 
   return (
-    <div className="relative flex gap-0.5 rounded-lg border border-border bg-panel-2 p-[3px]">
-      <motion.span
-        className="absolute top-[3px] bottom-[3px] z-0 rounded-md bg-accent"
-        animate={indicator}
-        transition={{ type: "spring", stiffness: 500, damping: 34 }}
-      />
-      {LEVELS.map((lvl) => (
-        <button
-          key={lvl.id}
-          type="button"
-          ref={(el) => {
-            refs.current[lvl.id] = el;
-          }}
-          onClick={() => setLevel(lvl.id)}
-          title={quizPassed[lvl.id] ? `${lvl.full} — quiz passed` : lvl.full}
-          className={cn(
-            "relative z-10 flex items-center gap-1 rounded-md px-3 py-1.5 font-mono text-[11px] font-semibold whitespace-nowrap transition-colors",
-            currentLevel === lvl.id ? "text-accent-ink" : "text-text-muted hover:text-text",
-          )}
-        >
-          {lvl.label}
-          {quizPassed[lvl.id] && (
-            <span
+    <nav
+      id="tour-journey-map"
+      aria-label="Curriculum Journey"
+      className="flex items-center gap-1 rounded-xl border border-border bg-panel-2 px-2.5 py-1.5 shadow-[var(--shadow-row)]"
+    >
+      {LEVELS.map((lvl, idx) => {
+        const isCurrent = currentLevel === lvl.id;
+        const isPassed = Boolean(quizPassed[lvl.id]);
+        const isVisited = Boolean(visited[lvl.id]) || isCurrent || isPassed;
+        const hasNext = idx < LEVELS.length - 1;
+
+        return (
+          <div key={lvl.id} className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setLevel(lvl.id)}
+              title={`${lvl.label} — ${lvl.full}${isPassed ? " (Quiz Passed)" : ""}`}
               className={cn(
-                "grid h-3 w-3 flex-none place-items-center rounded-full",
-                currentLevel === lvl.id ? "bg-accent-ink/25" : "bg-ok/20 text-ok",
+                "group relative flex items-center gap-1.5 rounded-lg px-2 py-1 text-left transition-all",
+                isCurrent
+                  ? "bg-panel text-text shadow-xs ring-1 ring-border"
+                  : "text-text-muted hover:bg-panel/60 hover:text-text",
               )}
             >
-              <Check className="h-2 w-2" strokeWidth={4} />
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
+              <div
+                className={cn(
+                  "relative grid h-5 w-5 flex-none place-items-center rounded-full font-mono text-[10px] font-bold transition-transform",
+                  isPassed
+                    ? "bg-ok text-white"
+                    : isCurrent
+                      ? "scale-105 bg-accent text-accent-ink ring-2 ring-accent/30"
+                      : isVisited
+                        ? "border border-border bg-panel text-text"
+                        : "border border-border/70 bg-panel-2 text-text-muted",
+                )}
+              >
+                {isPassed ? <Check className="h-2.5 w-2.5" strokeWidth={3.5} /> : <span>{idx}</span>}
+              </div>
+
+              <span
+                className={cn(
+                  "hidden font-mono text-[11px] whitespace-nowrap capitalize md:inline",
+                  isCurrent ? "font-bold text-text" : "font-medium",
+                )}
+              >
+                {lvl.id.replace("-", " ")}
+              </span>
+            </button>
+
+            {hasNext && (
+              <div className="mx-0.5 h-[2px] w-2.5 flex-none overflow-hidden rounded-full bg-border sm:w-3.5">
+                <div
+                  className={cn(
+                    "h-full transition-all duration-300",
+                    isPassed ? "bg-ok" : isCurrent ? "bg-accent/60" : "bg-transparent",
+                  )}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </nav>
   );
 }
 
@@ -136,11 +136,23 @@ function ShareButton() {
   );
 }
 
-export function TopBar() {
-  const hoodOpen = useAppStore((s) => s.hoodOpen);
-  const toggleHood = useAppStore((s) => s.toggleHood);
-  const { dark, toggle } = useTheme();
+function TourButton() {
+  const resetOnboarding = useProgressStore((s) => s.resetOnboarding);
 
+  return (
+    <button
+      type="button"
+      onClick={resetOnboarding}
+      title="Replay interactive guide tour"
+      className="flex items-center gap-1.5 rounded-md border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] font-semibold text-text-muted transition-colors hover:border-accent hover:text-accent"
+    >
+      <Compass className="h-3.5 w-3.5 text-accent" />
+      <span>Tour</span>
+    </button>
+  );
+}
+
+export function TopBar() {
   return (
     <header className="flex flex-none flex-wrap items-center justify-between gap-4 border-b border-border bg-panel px-5 py-3">
       <div className="flex items-center gap-2.5">
@@ -156,30 +168,10 @@ export function TopBar() {
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3.5">
-        <LevelNav />
-
+      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5">
+        <JourneyMap />
+        <TourButton />
         <ShareButton />
-
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label="Toggle color theme"
-          className="grid h-7 w-7 place-items-center rounded-md text-text-muted transition-colors hover:bg-panel-2 hover:text-text"
-        >
-          {dark === null ? null : dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
-
-        <label className="flex cursor-pointer items-center gap-2.5 select-none">
-          <span className="text-[12.5px] font-semibold text-text-muted">Under the hood</span>
-          <Switch.Root
-            checked={hoodOpen}
-            onCheckedChange={toggleHood}
-            className="relative h-[22px] w-[38px] flex-none rounded-full border border-border bg-panel-2 transition-colors data-[state=checked]:border-accent data-[state=checked]:bg-accent/30"
-          >
-            <Switch.Thumb className="block h-4 w-4 translate-x-0.5 rounded-full bg-text-muted transition-transform data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-accent" />
-          </Switch.Root>
-        </label>
       </div>
     </header>
   );
