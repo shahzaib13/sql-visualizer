@@ -9,8 +9,11 @@ import { evaluateHaving, HV_STAGES } from "@/lib/havingEngine";
 import { cn } from "@/lib/utils";
 import { useHavingStore } from "@/store/useHavingStore";
 import { BUCKET_COLORS, RowChip } from "../shared/RowChip";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function HavingHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useHavingStore((s) => s.stage);
   const groupCol = useHavingStore((s) => s.groupCol);
   const metricCol = useHavingStore((s) => s.metricCol);
@@ -30,12 +33,19 @@ export function HavingHoodPanel() {
   const visibleResults = selected ? results.filter((r) => r.passes) : results;
   const firstResult = results[0];
 
-  const caption = [
-    `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
-    `Rows with the same ${groupCol} slide together into one bucket — e.g. bucket "${firstResult?.key}" collapses to ${aggLabel(aggFn, metricCol)} = ${firstResult?.value}.`,
-    `HAVING checks each bucket's ${aggLabel(aggFn, metricCol)} against ${havingOp} ${havingValue} — e.g. bucket "${firstResult?.key}" has ${firstResult?.value}, so it ${firstResult?.passes ? "passes" : "fails"}. Failing buckets get rejected whole, not the rows inside them.`,
-    "Rejected buckets are gone for good — SELECT only ever sees the survivors.",
-  ][stage];
+  const caption = isUr
+    ? [
+        `Pehle har row disk se memory mein aati hai — kul ${POSTS.length} rows, aik aik kar ke, abhi koi grouping nahi hui.`,
+        `Aik jaisi ${groupCol} wali rows aik bucket mein chali jati hain — jaise bucket "${firstResult?.key}" compress ho kar ${aggLabel(aggFn, metricCol)} = ${firstResult?.value} ban jati hai.`,
+        `HAVING har bucket ke ${aggLabel(aggFn, metricCol)} ko check karta hai ke kya wo ${havingOp} ${havingValue} condition poori karta hai — jaise bucket "${firstResult?.key}" ki value ${firstResult?.value} hai, to yeh ${firstResult?.passes ? "pass" : "fail"} hui. Fail honay wali poori bucket reject hoti hai, rows alag alag nahi.`,
+        "Reject shuda buckets hamesha ke liye khatam — SELECT sirf bachne wali buckets ko hi dekhta hai.",
+      ][stage]
+    : [
+        `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
+        `Rows with the same ${groupCol} slide together into one bucket — e.g. bucket "${firstResult?.key}" collapses to ${aggLabel(aggFn, metricCol)} = ${firstResult?.value}.`,
+        `HAVING checks each bucket's ${aggLabel(aggFn, metricCol)} against ${havingOp} ${havingValue} — e.g. bucket "${firstResult?.key}" has ${firstResult?.value}, so it ${firstResult?.passes ? "passes" : "fails"}. Failing buckets get rejected whole, not the rows inside them.`,
+        "Rejected buckets are gone for good — SELECT only ever sees the survivors.",
+      ][stage];
 
   return (
     <div className="flex h-full flex-col">
@@ -48,7 +58,7 @@ export function HavingHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — 4 clauses recognised
+          {isUr ? "Query parse ho gayi — 4 clauses pehchani gayin" : "Query parsed — 4 clauses recognised"}
         </div>
         <motion.p
           key={caption}
@@ -72,7 +82,9 @@ export function HavingHoodPanel() {
                 </span>
               </div>
               <p className="mt-1.5 text-[10.5px] text-text-muted">
-                Loads every row from the table — {POSTS.length} rows read, still flat.
+                {isUr
+                  ? `Table se tamam rows load karta hai — ${POSTS.length} rows read hui hain, abhi flat form mein.`
+                  : `Loads every row from the table — ${POSTS.length} rows read, still flat.`}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

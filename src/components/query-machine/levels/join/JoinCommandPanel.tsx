@@ -178,15 +178,7 @@ function JoinTypeCard() {
 export function JoinCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Think of a librarian holding two separate stacks of index cards: Borrower Cards (users) and Checkout Slips (posts). For every borrower card, the librarian cross-references checkout slips matching that card's member ID. In an INNER JOIN, borrowers with zero checkouts (like Zara) are dropped. In a LEFT JOIN, every borrower is kept, stapling a blank checkout slip if they haven't borrowed anything."
-        keywords={[
-          { term: "JOIN", note: GLOSSARY.JOIN },
-          { term: "INNER JOIN", note: GLOSSARY["INNER JOIN"] },
-          { term: "LEFT JOIN", note: GLOSSARY["LEFT JOIN"] },
-          { term: "ON", note: GLOSSARY.ON },
-        ]}
-      />
+      <TheoryCard level="join" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">

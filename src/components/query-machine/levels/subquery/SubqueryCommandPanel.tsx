@@ -167,15 +167,7 @@ function OpCard() {
 export function SubqueryCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Think of a visitor asking the librarian a question that requires solving another question first: &ldquo;Bring me all books that are thicker than the library's average book.&rdquo; The librarian can't check any single book until they first calculate the overall average across the entire catalog (312 likes). Once that inner number is known, the librarian returns to the shelves and compares each book against it."
-        keywords={[
-          { term: "subquery", note: GLOSSARY.subquery },
-          { term: "scalar subquery", note: GLOSSARY["scalar subquery"] },
-          { term: "AVG", note: GLOSSARY.AVG },
-          { term: "WHERE", note: GLOSSARY.WHERE },
-        ]}
-      />
+      <TheoryCard level="subquery" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">

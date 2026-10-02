@@ -359,16 +359,7 @@ function LimitCard() {
 export function CommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Library Analogy: Think of MySQL like visiting a vast library. FROM is finding the right bookshelf ('posts'). WHERE is the librarian tossing out books that don't meet your criteria before you read them. SELECT is pulling the exact fields you asked for. ORDER BY stacks the remaining books by popularity, and LIMIT is carrying home only the top few."
-        keywords={[
-          { term: "SELECT", note: GLOSSARY.SELECT },
-          { term: "FROM", note: GLOSSARY.FROM },
-          { term: "WHERE", note: GLOSSARY.WHERE },
-          { term: "ORDER BY", note: GLOSSARY["ORDER BY"] },
-          { term: "LIMIT", note: GLOSSARY.LIMIT },
-        ]}
-      />
+      <TheoryCard level="filter" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">

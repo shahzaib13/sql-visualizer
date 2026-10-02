@@ -7,6 +7,7 @@ import type { PostRow } from "@/lib/data";
 import { combine, queryA, queryB, regions, SETOPS_STAGES, type SetOp } from "@/lib/setOpsEngine";
 import { cn } from "@/lib/utils";
 import { useSetOpsStore } from "@/store/useSetOpsStore";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const CX_A = 75;
 const CX_B = 125;
@@ -142,6 +143,8 @@ function RegionColumn({
 }
 
 export function SetOpsHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useSetOpsStore((s) => s.stage);
   const op = useSetOpsStore((s) => s.op);
   const setStage = useSetOpsStore((s) => s.setStage);
@@ -203,7 +206,9 @@ export function SetOpsHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — 2 SELECT queries + {op} operation
+          {isUr
+            ? `Query parse ho gayi — 2 SELECT queries + ${op} operation`
+            : `Query parsed — 2 SELECT queries + ${op} operation`}
         </div>
 
         {/* Node 0: Query A */}
@@ -234,7 +239,9 @@ export function SetOpsHoodPanel() {
           {stage === 0 ? (
             <div className="mt-2.5">
               <div className="text-[11px] text-text-muted mb-1.5">
-                Scanning table for <code className="font-mono text-accent">format = &apos;video&apos;</code>. Filtered set ready:
+                {isUr
+                  ? <>Table ko <code className="font-mono text-accent">format = &apos;video&apos;</code> ke liye scan kiya. Filtered set tayyar hai:</>
+                  : <>Scanning table for <code className="font-mono text-accent">format = &apos;video&apos;</code>. Filtered set ready:</>}
               </div>
               <div className="flex flex-wrap gap-1">
                 {a.map((r) => (
@@ -245,7 +252,11 @@ export function SetOpsHoodPanel() {
           ) : (
             <div className="mt-1.5 text-[10.5px] text-text-muted flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-ok" />
-              <span>Query A executed ({a.length} posts collected)</span>
+              <span>
+                {isUr
+                  ? `Query A chal chuki (${a.length} posts jama huin)`
+                  : `Query A executed (${a.length} posts collected)`}
+              </span>
             </div>
           )}
         </div>
@@ -279,7 +290,9 @@ export function SetOpsHoodPanel() {
           {stage === 1 ? (
             <div className="mt-2.5">
               <div className="text-[11px] text-text-muted mb-1.5">
-                Scanning table for <code className="font-mono text-ok">likes_count &gt; 400</code>. Filtered set ready:
+                {isUr
+                  ? <>Table ko <code className="font-mono text-ok">likes_count &gt; 400</code> ke liye scan kiya. Filtered set tayyar hai:</>
+                  : <>Scanning table for <code className="font-mono text-ok">likes_count &gt; 400</code>. Filtered set ready:</>}
               </div>
               <div className="flex flex-wrap gap-1">
                 {b.map((r) => (
@@ -290,12 +303,16 @@ export function SetOpsHoodPanel() {
           ) : stage > 1 ? (
             <div className="mt-1.5 text-[10.5px] text-text-muted flex items-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-ok" />
-              <span>Query B executed ({b.length} posts collected)</span>
+              <span>
+                {isUr
+                  ? `Query B chal chuki (${b.length} posts jama huin)`
+                  : `Query B executed (${b.length} posts collected)`}
+              </span>
             </div>
           ) : (
             <p className="mt-1.5 text-[10.5px] text-text-muted flex items-center gap-1">
               <ChevronRight className="h-3 w-3 text-text-muted" />
-              Click here or advance to run Query B
+              {isUr ? "Query B chalane ke liye yahan click karein ya aage barhein" : "Click here or advance to run Query B"}
             </p>
           )}
         </div>
@@ -318,11 +335,13 @@ export function SetOpsHoodPanel() {
               )}>
                 3
               </span>
-              <span>{op} the two result sets</span>
+              <span>
+                {isUr ? `Dono result sets par ${op} chalayein` : `${op} the two result sets`}
+              </span>
             </span>
             {stage >= 2 ? (
               <span className="rounded-full bg-accent px-2.5 py-0.5 font-mono text-[10px] font-bold whitespace-nowrap text-accent-ink">
-                {result.length} row{result.length === 1 ? "" : "s"} output
+                {result.length} {isUr ? "rows output" : result.length === 1 ? "row output" : "rows output"}
               </span>
             ) : (
               <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9px] font-bold text-text-muted">
@@ -335,15 +354,17 @@ export function SetOpsHoodPanel() {
             <div className="mt-3">
               <VennDiagram op={op} />
               <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                <RegionColumn title="A only" rows={aOnly} included={op === "UNION" || op === "EXCEPT"} tone="a" />
-                <RegionColumn title="Both (Overlap)" rows={overlap} included={op === "UNION" || op === "INTERSECT"} tone="overlap" />
-                <RegionColumn title="B only" rows={bOnly} included={op === "UNION"} tone="b" />
+                <RegionColumn title={isUr ? "Sirf A (A only)" : "A only"} rows={aOnly} included={op === "UNION" || op === "EXCEPT"} tone="a" />
+                <RegionColumn title={isUr ? "Dono (Overlap)" : "Both (Overlap)"} rows={overlap} included={op === "UNION" || op === "INTERSECT"} tone="overlap" />
+                <RegionColumn title={isUr ? "Sirf B (B only)" : "B only"} rows={bOnly} included={op === "UNION"} tone="b" />
               </div>
             </div>
           ) : (
             <p className="mt-2 text-[10.5px] text-text-muted flex items-center gap-1">
               <ChevronRight className="h-3 w-3 text-text-muted" />
-              Advance to stage 3 to view the Venn diagram and combined results.
+              {isUr
+                ? "Venn diagram aur combined nateeja dekhne ke liye stage 3 par jayein."
+                : "Advance to stage 3 to view the Venn diagram and combined results."}
             </p>
           )}
         </div>

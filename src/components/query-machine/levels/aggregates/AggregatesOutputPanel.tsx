@@ -12,6 +12,7 @@ import { POSTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useAggregatesStore } from "@/store/useAggregatesStore";
 import { SchemaCard, type SchemaColumn } from "@/components/query-machine/SchemaCard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const POSTS_SCHEMA: SchemaColumn[] = [
   { name: "id", type: "int", pk: true },
@@ -22,6 +23,7 @@ const POSTS_SCHEMA: SchemaColumn[] = [
 ];
 
 export function AggregatesOutputPanel() {
+  const { t } = useTranslation();
   const [view, setView] = useState<"output" | "input">("output");
   const stage = useAggregatesStore((s) => s.stage);
   const setStage = useAggregatesStore((s) => s.setStage);
@@ -66,11 +68,11 @@ export function AggregatesOutputPanel() {
             type="button"
             onClick={() => setView(v)}
             className={cn(
-              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold capitalize transition-colors",
+              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold transition-colors",
               view === v ? "bg-accent text-accent-ink" : "text-text-muted hover:text-text"
             )}
           >
-            {v}
+            {v === "input" ? t.output.inputTab : t.output.outputTab}
           </button>
         ))}
       </div>
@@ -146,13 +148,13 @@ export function AggregatesOutputPanel() {
 
           {!isComputed ? (
             <div className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
-              <p>SELECT hasn&apos;t run yet — advance to stage 3 (SELECT) to emit the final result.</p>
+              <p>{t.output.selectNotRunYet}</p>
               <button
                 type="button"
                 onClick={() => setStage(2)}
                 className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 font-mono text-[11px] font-bold text-accent-ink"
               >
-                Advance to SELECT
+                {t.output.advanceTo} SELECT
                 <ArrowRight className="h-3 w-3" />
               </button>
             </div>
@@ -213,7 +215,7 @@ export function AggregatesOutputPanel() {
               onClick={() => setStage(stage + 1)}
               className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
             >
-              Advance to {AGG_STAGES[stage + 1]}
+              {t.output.advanceTo} {AGG_STAGES[stage + 1]}
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}

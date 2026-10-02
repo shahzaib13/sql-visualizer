@@ -8,6 +8,7 @@ import { joinRows, JOIN_STAGES } from "@/lib/joinEngine";
 import { cn } from "@/lib/utils";
 import { useJoinStore } from "@/store/useJoinStore";
 import { SchemaCard, type SchemaColumn } from "@/components/query-machine/SchemaCard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const USERS_SCHEMA: SchemaColumn[] = [
   { name: "username", type: "varchar(255)", pk: true },
@@ -24,6 +25,7 @@ const POSTS_SCHEMA: SchemaColumn[] = [
 ];
 
 export function JoinOutputPanel() {
+  const { t } = useTranslation();
   const stage = useJoinStore((s) => s.stage);
   const joinType = useJoinStore((s) => s.joinType);
   const setStage = useJoinStore((s) => s.setStage);
@@ -41,11 +43,11 @@ export function JoinOutputPanel() {
             type="button"
             onClick={() => setView(v)}
             className={cn(
-              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold capitalize transition-colors",
+              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold transition-colors",
               view === v ? "bg-accent text-accent-ink" : "text-text-muted hover:text-text",
             )}
           >
-            {v}
+            {v === "input" ? t.output.inputTab : t.output.outputTab}
           </button>
         ))}
       </div>
@@ -75,6 +77,10 @@ export function JoinOutputPanel() {
                   users ({USERS.length})
                 </span>
                 <span className="text-[9.5px] text-text-muted font-normal">PK: username</span>
+              </div>
+              <div className="flex items-center justify-between px-2.5 py-1 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+                <span className="min-w-0 flex-1">user & details</span>
+                <span className="flex-none">status</span>
               </div>
               <div className="flex flex-col gap-1.5">
                 {USERS.map((u) => {
@@ -116,18 +122,33 @@ export function JoinOutputPanel() {
                 </span>
                 <span className="text-[9.5px] text-text-muted font-normal">FK: username</span>
               </div>
+              <div className="flex items-center gap-2 px-2.5 py-1 font-mono text-[9px] font-bold tracking-wide text-text-muted/70 uppercase">
+                <span className="w-5 flex-none">id</span>
+                <span className="min-w-0 flex-1 truncate">username</span>
+                <span className="w-12 flex-none text-center">format</span>
+                <span className="flex flex-none gap-2">
+                  <span className="w-10 text-right">likes</span>
+                  <span className="w-11 text-right">views</span>
+                </span>
+              </div>
               <div className="flex max-h-[360px] flex-col gap-1.5 overflow-y-auto pr-0.5">
                 {POSTS.map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-center gap-1.5 rounded-md border border-border bg-panel px-2.5 py-1.5 text-[11.5px] shadow-[var(--shadow-row)]"
+                    className="flex items-center gap-2 rounded-md border border-border bg-panel px-2.5 py-1.5 text-[11.5px] shadow-[var(--shadow-row)]"
                   >
-                    <span className="w-4 font-mono text-[10px] text-text-muted flex-none">#{p.id}</span>
+                    <span className="w-5 font-mono text-[10px] text-text-muted flex-none">#{p.id}</span>
                     <span className="min-w-0 flex-1 truncate font-medium text-[11px] text-text">@{p.username}</span>
-                    <span className="font-mono text-[10px] text-text-muted flex-none">{p.format}</span>
-                    <span className="flex items-center gap-0.5 font-mono text-[10px] text-bad font-semibold flex-none">
-                      <Heart className="h-2 w-2 fill-current" strokeWidth={0} />
-                      {p.likes_count}
+                    <span className="w-12 text-center font-mono text-[10px] text-text-muted flex-none">{p.format}</span>
+                    <span className="flex flex-none gap-2 font-mono text-[10px]">
+                      <span className="flex w-10 items-center justify-end gap-0.5 text-bad font-semibold">
+                        <Heart className="h-2 w-2 fill-current" strokeWidth={0} />
+                        {p.likes_count}
+                      </span>
+                      <span className="flex w-11 items-center justify-end gap-0.5 text-flow font-semibold">
+                        <Eye className="h-2 w-2" />
+                        {p.views_count}
+                      </span>
                     </span>
                   </div>
                 ))}
@@ -139,12 +160,12 @@ export function JoinOutputPanel() {
         <>
           <div className="flex items-baseline gap-2 font-mono">
             <span className="text-[26px] font-bold">{computed ? rows.length : "?"}</span>
-            <span className="text-[11.5px] text-text-muted">row{rows.length === 1 ? "" : "s"} returned</span>
+            <span className="text-[11.5px] text-text-muted">{t.output.rowsReturned}</span>
           </div>
 
           {!computed ? (
             <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
-              SELECT hasn&apos;t run yet — advance to the SELECT stage to see the joined rows.
+              {t.output.selectNotRunYet}
             </p>
           ) : (
             /* Responsive auto-fit table without horizontal overflow */
@@ -210,7 +231,7 @@ export function JoinOutputPanel() {
               onClick={() => setStage(stage + 1)}
               className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
             >
-              Advance to {JOIN_STAGES[stage + 1]}
+              {t.output.advanceTo} {JOIN_STAGES[stage + 1]}
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}

@@ -8,6 +8,7 @@ import { joinRows, JOIN_STAGES, type JoinType } from "@/lib/joinEngine";
 import { cn } from "@/lib/utils";
 import { useJoinStore } from "@/store/useJoinStore";
 import { SchemaCard } from "@/components/query-machine/SchemaCard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const USERS_SCHEMA = [
   { name: "username", type: "varchar(255)", pk: true },
@@ -100,24 +101,36 @@ const CY = 45;
 const R = 34;
 
 function JoinVennDiagram({ joinType }: { joinType: JoinType }) {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   let title = "";
   let description = "";
 
   if (joinType === "INNER") {
-    title = "INNER JOIN (Intersection)";
-    description = "Retains ONLY rows where users.username = posts.username exists in BOTH tables.";
+    title = isUr ? "INNER JOIN (Mushtarak / Intersection)" : "INNER JOIN (Intersection)";
+    description = isUr
+      ? "Sirf wahi rows bachti hain jahan users.username = posts.username DONO tables mein mojood ho."
+      : "Retains ONLY rows where users.username = posts.username exists in BOTH tables.";
   } else if (joinType === "LEFT") {
-    title = "LEFT JOIN (All Left + Matches)";
-    description = "Retains ALL users. If a user has no posts (e.g. @zara_iqbal), post columns are filled with NULL.";
+    title = isUr ? "LEFT JOIN (Left ke Tamam + Matches)" : "LEFT JOIN (All Left + Matches)";
+    description = isUr
+      ? "Left table (users) ki TAMAM rows bachti hain. Agar kisi user ki koi post na ho (jaise @zara_iqbal), to post columns mein NULL lag jata hai."
+      : "Retains ALL users. If a user has no posts (e.g. @zara_iqbal), post columns are filled with NULL.";
   } else if (joinType === "RIGHT") {
-    title = "RIGHT JOIN (All Right + Matches)";
-    description = "Retains ALL posts. If a post has no user, user columns are filled with NULL.";
+    title = isUr ? "RIGHT JOIN (Right ke Tamam + Matches)" : "RIGHT JOIN (All Right + Matches)";
+    description = isUr
+      ? "Right table (posts) ki TAMAM rows bachti hain. Agar kisi post ka koi user na mile, to user columns mein NULL lag jata hai."
+      : "Retains ALL posts. If a post has no user, user columns are filled with NULL.";
   } else if (joinType === "FULL OUTER") {
-    title = "FULL OUTER JOIN (Complete Union)";
-    description = "Retains ALL users and ALL posts. Unmatched rows on either side are filled with NULL.";
+    title = isUr ? "FULL OUTER JOIN (Mukammal Union)" : "FULL OUTER JOIN (Complete Union)";
+    description = isUr
+      ? "TAMAM users aur TAMAM posts shamil rehte hain. Dono taraf ke unmatched records mein NULL fill hojata hai."
+      : "Retains ALL users and ALL posts. Unmatched rows on either side are filled with NULL.";
   } else if (joinType === "CROSS") {
-    title = "CROSS JOIN (Cartesian Product)";
-    description = "Pairs EVERY user with EVERY post. Result size = 10 users × 20 posts = 200 rows.";
+    title = isUr ? "CROSS JOIN (Cartesian Product)" : "CROSS JOIN (Cartesian Product)";
+    description = isUr
+      ? "Har aik user ko har aik post ke sath jorta hai. Total result = 10 users × 20 posts = 200 rows banti hain."
+      : "Pairs EVERY user with EVERY post. Result size = 10 users × 20 posts = 200 rows.";
   }
 
   return (
@@ -537,6 +550,8 @@ function JoinBipartiteVisual({ joinType }: { joinType: JoinType }) {
 }
 
 export function JoinHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useJoinStore((s) => s.stage);
   const joinType = useJoinStore((s) => s.joinType);
   const setStage = useJoinStore((s) => s.setStage);
@@ -594,7 +609,9 @@ export function JoinHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — {joinType} JOIN stitching 2 tables
+          {isUr
+            ? `Query parse ho gayi — ${joinType} JOIN 2 tables ko jor rahi hai`
+            : `Query parsed — ${joinType} JOIN stitching 2 tables`}
         </div>
 
         {/* Stage 1: FROM */}
@@ -609,7 +626,11 @@ export function JoinHoodPanel() {
               FROM users u
             </span>
           }
-          subtitle={`Loads every row from the users table — ${USERS.length} rows read.`}
+          subtitle={
+            isUr
+              ? `users table se har row load karta hai — ${USERS.length} rows read huin.`
+              : `Loads every row from the users table — ${USERS.length} rows read.`
+          }
           badge={
             <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap text-text-muted">
               Left table ({USERS.length} rows)
@@ -617,7 +638,15 @@ export function JoinHoodPanel() {
           }
         >
           <div className="rounded-lg border border-border bg-panel-2 p-2.5 text-[11.5px] text-text-muted leading-relaxed">
-            The database initializes its pipeline by buffering the primary driving table <b className="font-mono text-text">users</b> into memory before evaluating join criteria.
+            {isUr ? (
+              <>
+                Database join shuru karne se pehle primary driving table <b className="font-mono text-text">users</b> ko memory mein buffer karta hai.
+              </>
+            ) : (
+              <>
+                The database initializes its pipeline by buffering the primary driving table <b className="font-mono text-text">users</b> into memory before evaluating join criteria.
+              </>
+            )}
           </div>
         </NodeCard>
 
@@ -632,8 +661,12 @@ export function JoinHoodPanel() {
           title={`${joinType} JOIN posts p`}
           subtitle={
             joinType === "CROSS"
-              ? "Cartesian product: pairs every user with every post"
-              : "Matching condition: u.username = p.username"
+              ? isUr
+                ? "Cartesian product: har user ko har post ke sath jorta hai"
+                : "Cartesian product: pairs every user with every post"
+              : isUr
+                ? "Matching condition: u.username = p.username"
+                : "Matching condition: u.username = p.username"
           }
           badge={
             stage === 1 ? (
@@ -677,7 +710,13 @@ export function JoinHoodPanel() {
             )}
           </AnimatePresence>
 
-          {stage < 1 && <p className="text-[11px] text-text-muted">Advance to stage 2 to inspect table relationships and matches.</p>}
+          {stage < 1 && (
+            <p className="text-[11px] text-text-muted">
+              {isUr
+                ? "Table relationships aur matches dekhne ke liye stage 2 par jayein."
+                : "Advance to stage 2 to inspect table relationships and matches."}
+            </p>
+          )}
         </NodeCard>
 
         <CenteredConnector flowing={stage >= 2} />
@@ -689,11 +728,15 @@ export function JoinHoodPanel() {
           active={stage === 2}
           onClick={() => setStage(2)}
           title="SELECT u.username, u.full_name, p.format, p.likes_count"
-          subtitle="Emits the joined and filtered tuple stream to the client"
+          subtitle={
+            isUr
+              ? "Joined aur filtered rows client ko emit karta hai"
+              : "Emits the joined and filtered tuple stream to the client"
+          }
           badge={
             stage >= 2 ? (
               <span className="rounded-full bg-accent/15 px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap text-accent">
-                {rows.length} row{rows.length === 1 ? "" : "s"}
+                {rows.length} {isUr ? "rows" : rows.length === 1 ? "row" : "rows"}
               </span>
             ) : (
               <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9.5px] font-bold whitespace-nowrap text-text-muted">
@@ -705,7 +748,7 @@ export function JoinHoodPanel() {
           {stage >= 2 ? (
             <div className="flex flex-col gap-1.5">
               <div className="text-[11px] text-text-muted mb-1">
-                Joined tuples synthesized from memory:
+                {isUr ? "Memory se synthesize ki gayi joined rows:" : "Joined tuples synthesized from memory:"}
               </div>
               <div className="max-h-[280px] overflow-y-auto flex flex-col gap-1.5 pr-1">
                 {rows.map((r, i) => (
@@ -741,7 +784,9 @@ export function JoinHoodPanel() {
               </div>
             </div>
           ) : (
-            <p className="text-[11px] text-text-muted">Advance to stage 3 to emit the joined rows.</p>
+            <p className="text-[11px] text-text-muted">
+              {isUr ? "Joined rows emit karne ke liye stage 3 par jayein." : "Advance to stage 3 to emit the joined rows."}
+            </p>
           )}
         </NodeCard>
       </div>

@@ -14,8 +14,11 @@ import { useJoinStore } from "@/store/useJoinStore";
 import { useQueryStore } from "@/store/useQueryStore";
 import { useSetOpsStore } from "@/store/useSetOpsStore";
 import { useSubqueryStore } from "@/store/useSubqueryStore";
+import { useIndexStore } from "@/store/useIndexStore";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function ChallengeCard({ level }: { level: LevelId }) {
+  const { t } = useTranslation();
   // Level 0: Filter
   const threshold = useQueryStore((s) => s.threshold);
   const filterPassing = passingCount(threshold);
@@ -47,6 +50,10 @@ export function ChallengeCard({ level }: { level: LevelId }) {
 
   // Level 6: Subquery
   const subOp = useSubqueryStore((s) => s.op);
+
+  // Level 7: Index
+  const indexStatus = useIndexStore((s) => s.indexStatus);
+  const targetUser = useIndexStore((s) => s.targetUser);
 
   let title = "";
   let prompt = "";
@@ -96,6 +103,13 @@ export function ChallengeCard({ level }: { level: LevelId }) {
       currentStatus = `Operator: likes_count ${subOp} AVG`;
       isSolved = subOp === "<";
       break;
+    case "index":
+      title = "Index Challenge";
+      prompt = "Activate Use Index (B-Tree) and select '@sara_khan' to find all 3 posts in just 2 hops!";
+      currentStatus = `Current: @${targetUser} (${indexStatus === "btree" ? "B-Tree Active" : "No Index"})`;
+      isSolved = indexStatus === "btree" && targetUser === "sara_khan";
+      break;
+
   }
 
   return (
@@ -120,10 +134,10 @@ export function ChallengeCard({ level }: { level: LevelId }) {
             className="flex items-center gap-1 rounded-full bg-ok/15 px-2 py-0.5 font-mono text-[9px] font-bold text-ok"
           >
             <Trophy className="h-2.5 w-2.5" />
-            Solved!
+            {t.challenge.badgeSolved}
           </motion.span>
         ) : (
-          <span className="font-mono text-[9.5px] text-text-muted">Interactive</span>
+          <span className="font-mono text-[9.5px] text-text-muted">{t.challenge.badgeInteractive}</span>
         )}
       </div>
 
@@ -134,10 +148,10 @@ export function ChallengeCard({ level }: { level: LevelId }) {
         {isSolved ? (
           <span className="flex items-center gap-1 font-bold text-ok">
             <Check className="h-3 w-3" strokeWidth={3} />
-            Target Met
+            {t.challenge.targetMet}
           </span>
         ) : (
-          <span className="text-warn font-semibold">Keep tweaking</span>
+          <span className="text-warn font-semibold">{t.challenge.keepTweaking}</span>
         )}
       </div>
     </div>

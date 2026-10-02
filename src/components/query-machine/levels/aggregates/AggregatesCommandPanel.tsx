@@ -199,31 +199,7 @@ export function AggregatesCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto min-h-0 p-4 pb-20 flex flex-col gap-4 text-text">
       {/* 1. Theory Card (Collapsed by default) */}
-      <TheoryCard
-        goal="Think of aggregate functions (SUM, AVG, MIN, MAX, COUNT) like a blender or calculator: they take all 20 rows and condense them into a single summary number. DISTINCT acts like a bouncer at a club door: if a value was already seen, the duplicate is thrown out, leaving only unique entries."
-        keywords={[
-          {
-            term: "DISTINCT",
-            note: "Eliminates duplicate values from a column so each unique value appears only once.",
-          },
-          {
-            term: "COUNT(*)",
-            note: "Counts total rows returned by the query.",
-          },
-          {
-            term: "SUM(col)",
-            note: "Adds all numbers in the specified column together into a single total.",
-          },
-          {
-            term: "AVG(col)",
-            note: "Calculates the arithmetic average: SUM(col) ÷ COUNT(*).",
-          },
-          {
-            term: "MIN / MAX",
-            note: "Finds the lowest (MIN) or highest (MAX) value across all rows.",
-          },
-        ]}
-      />
+      <TheoryCard level="aggregates" />
 
       {/* 2. SQL Block */}
       <SqlBlock />

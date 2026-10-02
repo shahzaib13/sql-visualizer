@@ -152,14 +152,7 @@ function OpCard() {
 export function SetOpsCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Think of two teachers submitting recommended reading lists to the library: Teacher A (all video-related materials) and Teacher B (all high-impact items with 400+ likes). UNION combines both recommendation slips while discarding duplicates so no book is bought twice. INTERSECT finds books on both teachers' wishlists. EXCEPT keeps Teacher A's picks unless Teacher B already recommended them."
-        keywords={[
-          { term: "UNION", note: GLOSSARY.UNION },
-          { term: "INTERSECT", note: GLOSSARY.INTERSECT },
-          { term: "EXCEPT", note: GLOSSARY.EXCEPT },
-        ]}
-      />
+      <TheoryCard level="set-ops" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">

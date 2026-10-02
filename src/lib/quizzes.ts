@@ -126,4 +126,30 @@ export const QUIZZES: Record<LevelId, QuizQuestion[]> = {
       hint: "You can only compare a number against a single number.",
     },
   ],
+  index: [
+    {
+      prompt: "How does a B-Tree Index on `username` speed up `SELECT * FROM posts WHERE username = 'sara_khan'`?",
+      choices: [
+        "It caches the result in browser memory",
+        "It traverses an alphabetical B-Tree in 2-3 hops directly to memory pointers instead of reading all 20 rows from disk",
+        "It deletes all rows that don't match before the query starts",
+        "It runs the query on multiple computers simultaneously",
+      ],
+      correctIndex: 1,
+      explain: "Like an index at the back of a dictionary, MySQL jumps down alphabetical B-Tree levels directly to matching row pointers in 2-3 hops.",
+      hint: "Think about how an alphabetical index saves you from reading all pages.",
+    },
+    {
+      prompt: "What is the main trade-off (write penalty) when you add indexes to a table?",
+      choices: [
+        "SELECT queries become much slower",
+        "INSERT, UPDATE, and DELETE operations become slower because every index tree must also be updated and rebalanced",
+        "The database limits tables to a maximum of 100 rows",
+        "Columns with indexes can no longer be filtered",
+      ],
+      correctIndex: 1,
+      explain: "Every extra index requires additional disk writes and tree rebalancing (page splits) whenever new rows are inserted or modified.",
+      hint: "If you add a new page to a book, you also have to rewrite the index at the back.",
+    },
+  ],
 };

@@ -8,6 +8,7 @@ import { combine, SETOPS_STAGES } from "@/lib/setOpsEngine";
 import { cn } from "@/lib/utils";
 import { useSetOpsStore } from "@/store/useSetOpsStore";
 import { SchemaCard, type SchemaColumn } from "@/components/query-machine/SchemaCard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const POSTS_SCHEMA: SchemaColumn[] = [
   { name: "id", type: "int", pk: true },
@@ -18,6 +19,7 @@ const POSTS_SCHEMA: SchemaColumn[] = [
 ];
 
 export function SetOpsOutputPanel() {
+  const { t } = useTranslation();
   const stage = useSetOpsStore((s) => s.stage);
   const op = useSetOpsStore((s) => s.op);
   const setStage = useSetOpsStore((s) => s.setStage);
@@ -34,11 +36,11 @@ export function SetOpsOutputPanel() {
             type="button"
             onClick={() => setView(v)}
             className={cn(
-              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold capitalize transition-colors",
+              "flex-1 rounded-md py-1.5 font-mono text-[11px] font-semibold transition-colors",
               view === v ? "bg-accent text-accent-ink" : "text-text-muted hover:text-text",
             )}
           >
-            {v}
+            {v === "input" ? t.output.inputTab : t.output.outputTab}
           </button>
         ))}
       </div>
@@ -99,12 +101,12 @@ export function SetOpsOutputPanel() {
         <>
           <div className="flex items-baseline gap-2 font-mono">
             <span className="text-[26px] font-bold">{computed ? rows.length : "?"}</span>
-            <span className="text-[11.5px] text-text-muted">row{rows.length === 1 ? "" : "s"} returned</span>
+            <span className="text-[11.5px] text-text-muted">{t.output.rowsReturned}</span>
           </div>
 
           {!computed ? (
             <p className="mt-6 rounded-xl border border-dashed border-border p-5 text-center text-[12px] text-text-muted">
-              Combine hasn&apos;t run yet — advance to the COMBINE stage to see the result.
+              {t.output.combineNotRunYet}
             </p>
           ) : (
             <div className="mt-4 w-full min-w-0 pb-2">
@@ -143,7 +145,7 @@ export function SetOpsOutputPanel() {
               onClick={() => setStage(stage + 1)}
               className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
             >
-              Advance to {SETOPS_STAGES[stage + 1]}
+              {t.output.advanceTo} {SETOPS_STAGES[stage + 1]}
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}

@@ -7,6 +7,7 @@ import { POSTS } from "@/lib/data";
 import { classifyBySubquery, subqueryAvgLikes, SUBQUERY_STAGES } from "@/lib/subqueryEngine";
 import { cn } from "@/lib/utils";
 import { useSubqueryStore } from "@/store/useSubqueryStore";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 function CenteredConnector({ flowing }: { flowing: boolean }) {
   return (
@@ -39,6 +40,8 @@ function StatCard({ tone, value, label }: { tone: "ok" | "bad"; value: number; l
 }
 
 export function SubqueryHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useSubqueryStore((s) => s.stage);
   const op = useSubqueryStore((s) => s.op);
   const setStage = useSubqueryStore((s) => s.setStage);
@@ -101,7 +104,9 @@ export function SubqueryHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-3 sm:p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — 1 outer query wrapping 1 nested subquery
+          {isUr
+            ? "Query parse ho gayi — 1 outer query jis ke andar 1 nested subquery hai"
+            : "Query parsed — 1 outer query wrapping 1 nested subquery"}
         </div>
 
         {/* NODE 0: FROM posts */}
@@ -133,7 +138,9 @@ export function SubqueryHoodPanel() {
             </span>
           </div>
           <p className="mt-2.5 text-[11px] text-text-muted leading-relaxed">
-            Loads every row from the table into working buffer memory before applying subquery filtering.
+            {isUr
+              ? "Subquery filtering lagane se pehle table ki tamam rows ko memory buffer mein load karta hai."
+              : "Loads every row from the table into working buffer memory before applying subquery filtering."}
           </p>
         </div>
 
@@ -146,7 +153,9 @@ export function SubqueryHoodPanel() {
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md bg-accent/15 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-accent uppercase">
                 <Layers className="h-3 w-3" />
-                Outer Query (Main) · Contains Nested Subquery
+                {isUr
+                  ? "Outer Query (Main) · Nested Subquery Iske Andar Hai"
+                  : "Outer Query (Main) · Contains Nested Subquery"}
               </span>
             </div>
             <span className="font-mono text-[11px] text-text-muted">
@@ -156,7 +165,9 @@ export function SubqueryHoodPanel() {
                   {avg}
                 </span>
               ) : (
-                <span className="italic text-text-muted">(awaiting inner query answer...)</span>
+                <span className="italic text-text-muted">
+                  {isUr ? "(inner query ke jawab ka intezar...)" : "(awaiting inner query answer...)"}
+                </span>
               )}
             </span>
           </div>
@@ -194,12 +205,14 @@ export function SubqueryHoodPanel() {
                   stage === 1 ? "bg-warn text-white" : stage > 1 ? "bg-ok/20 text-ok" : "border border-border text-text-muted",
                 )}
               >
-                {stage > 1 ? "Answer ready" : "Runs first"}
+                {stage > 1 ? (isUr ? "Jawab tayyar" : "Answer ready") : (isUr ? "Pehle chalti hai" : "Runs first")}
               </span>
             </div>
 
             <p className="mt-2 text-[11px] text-text-muted leading-relaxed">
-              This inner query runs first. MySQL inspects all {POSTS.length} posts, sums up their likes, and divides by {POSTS.length} to compute one average number.
+              {isUr
+                ? `Yeh inner query sab se pehle chalti hai. MySQL tamam ${POSTS.length} posts check karta hai, unke likes jama karta hai, aur ${POSTS.length} par divide kar ke aik average number nikalta hai.`
+                : `This inner query runs first. MySQL inspects all ${POSTS.length} posts, sums up their likes, and divides by ${POSTS.length} to compute one average number.`}
             </p>
 
             <AnimatePresence>
@@ -288,12 +301,20 @@ export function SubqueryHoodPanel() {
                 </span>
               </div>
               <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9px] font-bold text-text-muted">
-                Row comparison
+                {isUr ? "Row comparison" : "Row comparison"}
               </span>
             </div>
 
             <p className="mt-2 text-[11px] text-text-muted leading-relaxed">
-              With the inner query replaced by <b className="text-text">{avg}</b>, MySQL evaluates each of the {POSTS.length} rows against this condition.
+              {isUr ? (
+                <>
+                  Inner query ki jagah ab result <b className="text-text">{avg}</b> aa chuka hai, ab MySQL tamam {POSTS.length} rows ko is condition par check karta hai.
+                </>
+              ) : (
+                <>
+                  With the inner query replaced by <b className="text-text">{avg}</b>, MySQL evaluates each of the {POSTS.length} rows against this condition.
+                </>
+              )}
             </p>
 
             <AnimatePresence>
@@ -305,8 +326,8 @@ export function SubqueryHoodPanel() {
                   className="mt-3 overflow-hidden space-y-2.5"
                 >
                   <div className="flex gap-2">
-                    <StatCard tone="ok" value={included.length} label="passed condition" />
-                    <StatCard tone="bad" value={excluded.length} label="rejected condition" />
+                    <StatCard tone="ok" value={included.length} label={isUr ? "condition pass hui" : "passed condition"} />
+                    <StatCard tone="bad" value={excluded.length} label={isUr ? "condition fail hui" : "rejected condition"} />
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">

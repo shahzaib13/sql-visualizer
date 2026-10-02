@@ -7,6 +7,7 @@ import { QUIZZES } from "@/lib/quizzes";
 import { cn } from "@/lib/utils";
 import type { LevelId } from "@/store/useAppStore";
 import { useProgressStore } from "@/store/useProgressStore";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const CELEBRATION_PARTICLES = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -16,6 +17,7 @@ const CELEBRATION_PARTICLES = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export function QuizCard({ level }: { level: LevelId }) {
+  const { t } = useTranslation();
   const questions = QUIZZES[level];
   const [picked, setPicked] = useState<(number | null)[]>(() => questions.map(() => null));
   const [showHint, setShowHint] = useState<Record<number, boolean>>({});
@@ -81,7 +83,7 @@ export function QuizCard({ level }: { level: LevelId }) {
       <div className="mb-2.5 flex items-center justify-between gap-2">
         <p className="flex items-center gap-1.5 text-[10.5px] font-bold tracking-wide text-text-muted uppercase">
           <HelpCircle className="h-3 w-3" />
-          Check yourself
+          {t.quiz.title}
         </p>
         {(quizPassed || allCorrect) && (
           <motion.span
@@ -90,7 +92,7 @@ export function QuizCard({ level }: { level: LevelId }) {
             className="flex items-center gap-1 rounded-full bg-ok/15 px-2 py-0.5 font-mono text-[9.5px] font-bold text-ok"
           >
             <Sparkles className="h-2.5 w-2.5" />
-            passed
+            {t.quiz.passed}
           </motion.span>
         )}
       </div>
@@ -114,7 +116,7 @@ export function QuizCard({ level }: { level: LevelId }) {
                     className="flex flex-none items-center gap-0.5 rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold text-text-muted transition-colors hover:bg-panel hover:text-warn"
                   >
                     <Lightbulb className="h-2.5 w-2.5" />
-                    {hintOpen ? "Hide" : "Hint"}
+                    {hintOpen ? t.quiz.hide : t.quiz.hint}
                   </button>
                 )}
               </div>

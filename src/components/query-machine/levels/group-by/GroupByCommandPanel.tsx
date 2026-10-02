@@ -215,15 +215,7 @@ function AggregateCard() {
 export function GroupByCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Library Analogy: In our library, GROUP BY is sorting books into different piles by category (e.g. by format: image vs video). Once sorted into distinct piles, aggregate functions like COUNT() or AVG() calculate one summary number for each pile, rather than for each individual book."
-        keywords={[
-          { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
-          { term: "COUNT(*)", note: GLOSSARY["COUNT(*)"] },
-          { term: "SUM", note: GLOSSARY.SUM },
-          { term: "AVG", note: GLOSSARY.AVG },
-        ]}
-      />
+      <TheoryCard level="group-by" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">

@@ -12,11 +12,26 @@ function ResizeHandle() {
   );
 }
 
+import { useTranslation } from "@/lib/i18n/useTranslation";
+
 export function SectionHeader({ title, hint }: { title: string; hint: string }) {
+  const { locale, t } = useTranslation();
+
+  const localizedHint =
+    locale === "ur"
+      ? hint === "Tweaks & controls"
+        ? t.headers.commandDeckHint
+        : hint === "Visual execution pipeline"
+          ? t.headers.underTheHoodHint
+          : hint === "Live query output"
+            ? t.headers.outputViewHint
+            : hint
+      : hint;
+
   return (
     <div className="flex flex-none items-center justify-between gap-2.5 border-b border-border px-4 py-2.5">
       <h2 className="text-[12.5px] font-bold tracking-wide text-text-muted uppercase">{title}</h2>
-      <span className="text-[11px] text-text-muted">{hint}</span>
+      <span className="text-[11px] text-text-muted">{localizedHint}</span>
     </div>
   );
 }

@@ -8,8 +8,11 @@ import { cn } from "@/lib/utils";
 import { useGroupByStore } from "@/store/useGroupByStore";
 import { POSTS } from "@/lib/data";
 import { BUCKET_COLORS, RowChip } from "../shared/RowChip";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function GroupByHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useGroupByStore((s) => s.stage);
   const groupCol = useGroupByStore((s) => s.groupCol);
   const metricCol = useGroupByStore((s) => s.metricCol);
@@ -26,11 +29,17 @@ export function GroupByHoodPanel() {
   }, [stage]);
 
   const firstGroup = groups[0];
-  const caption = [
-    `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
-    `Rows with the same ${groupCol} slide together into one bucket — watch them travel. e.g. every row where ${groupCol} = "${firstGroup?.key}" lands in the same bucket.`,
-    `Each bucket collapses to a single row: e.g. bucket "${firstGroup?.key}" has ${firstGroup?.rows.length} row${firstGroup?.rows.length === 1 ? "" : "s"}, so ${aggLabel(aggFn, metricCol)} = ${firstGroup?.value}.`,
-  ][stage];
+  const caption = isUr
+    ? [
+        `Pehle har row disk se memory mein aati hai — kul ${POSTS.length} rows, aik aik kar ke, abhi koi grouping nahi hui.`,
+        `Aik jaisi ${groupCol} value wali rows aik hi bucket mein slide hojati hain — jaise har row jahan ${groupCol} = "${firstGroup?.key}" hai wo usi bucket mein aati hai.`,
+        `Har bucket compress ho kar sirf 1 row ban jati hai: maslan bucket "${firstGroup?.key}" mein ${firstGroup?.rows.length} rows thein, to ${aggLabel(aggFn, metricCol)} = ${firstGroup?.value} nikla.`,
+      ][stage]
+    : [
+        `Every row is read from disk into memory first — all ${POSTS.length}, still one at a time, nothing grouped yet.`,
+        `Rows with the same ${groupCol} slide together into one bucket — watch them travel. e.g. every row where ${groupCol} = "${firstGroup?.key}" lands in the same bucket.`,
+        `Each bucket collapses to a single row: e.g. bucket "${firstGroup?.key}" has ${firstGroup?.rows.length} row${firstGroup?.rows.length === 1 ? "" : "s"}, so ${aggLabel(aggFn, metricCol)} = ${firstGroup?.value}.`,
+      ][stage];
 
   return (
     <div className="flex h-full flex-col">
@@ -43,7 +52,7 @@ export function GroupByHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — 3 clauses recognised
+          {isUr ? "Query parse ho gayi — 3 clauses pehchani gayin" : "Query parsed — 3 clauses recognised"}
         </div>
         <motion.p
           key={caption}
@@ -67,7 +76,9 @@ export function GroupByHoodPanel() {
                 </span>
               </div>
               <p className="mt-1.5 text-[10.5px] text-text-muted">
-                Loads every row from the table — {POSTS.length} rows read, still flat.
+                {isUr
+                  ? `Table se tamam rows load karta hai — ${POSTS.length} rows read hui hain, abhi flat form mein.`
+                  : `Loads every row from the table — ${POSTS.length} rows read, still flat.`}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -106,7 +117,7 @@ export function GroupByHoodPanel() {
 
                     <div className="flex items-center gap-2">
                       <span className="rounded-full border border-border bg-panel px-2 py-0.5 font-mono text-[9.5px] font-bold text-text-muted">
-                        {g.rows.length} rows collected
+                        {g.rows.length} {isUr ? "rows jama huin" : "rows collected"}
                       </span>
 
                       <AnimatePresence>

@@ -8,6 +8,7 @@ import { classify, passingCount, selectColsText, STAGES } from "@/lib/queryEngin
 import { cn } from "@/lib/utils";
 import { useQueryStore } from "@/store/useQueryStore";
 import { Term } from "@/components/ui/Term";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const ALL_COLUMNS = ["username", "format", "likes_count", "views_count"] as const;
 
@@ -112,6 +113,8 @@ function Badge({ tone = "neutral", children }: { tone?: "accent" | "ok" | "warn"
 }
 
 export function PipelineHoodPanel() {
+  const { t, locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useQueryStore((s) => s.stage);
   const threshold = useQueryStore((s) => s.threshold);
   const selectedCols = useQueryStore((s) => s.selectedCols);
@@ -182,7 +185,7 @@ export function PipelineHoodPanel() {
       <div ref={bodyRef} className="dotted-canvas scrollbar-thin flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-2 font-mono text-[10.5px] font-semibold text-ok">
           <Check className="h-3.5 w-3.5" strokeWidth={3} />
-          Query parsed — 5 clauses recognised
+          {t.hood.queryParsed}
         </div>
 
         {/* FROM */}
@@ -194,7 +197,7 @@ export function PipelineHoodPanel() {
             </span>
             <Badge tone="neutral">Base table</Badge>
           </div>
-          <p className="mt-1.5 text-[10.5px] text-text-muted">Loads every row from the table — {total} rows read</p>
+          <p className="mt-1.5 text-[10.5px] text-text-muted">{t.hood.fromLoads(total)}</p>
         </NodeShell>
 
         <Connector flowing={stage >= 1} />
@@ -223,14 +226,10 @@ export function PipelineHoodPanel() {
 
                 <div className="mt-3 rounded-lg border border-border bg-panel-2 p-2.5">
                   <p className="mb-1.5 text-[10px] font-bold tracking-wide text-text-muted uppercase">
-                    How MySQL finds the matching rows
+                    {t.hood.howMysqlFinds}
                   </p>
                   <p className="mb-2 text-[10px] leading-snug text-text-muted">
-                    It can either check every row one by one, or use a shortcut called an{" "}
-                    <Term term="index" className="underline decoration-dotted">
-                      index
-                    </Term>{" "}
-                    — like a book&apos;s index — to jump straight to the rows that match.
+                    {t.hood.indexConcept}
                   </p>
                   <div className="flex gap-1.5">
                     <button
@@ -241,7 +240,7 @@ export function PipelineHoodPanel() {
                         !simIndex ? "border-flow bg-flow/15 text-flow" : "border-border text-text-muted",
                       )}
                     >
-                      Check every row
+                      {t.hood.checkEveryRow}
                     </button>
                     <button
                       type="button"
@@ -251,18 +250,18 @@ export function PipelineHoodPanel() {
                         simIndex ? "border-ok bg-ok/15 text-ok" : "border-border text-text-muted",
                       )}
                     >
-                      Use an index (jump to matches)
+                      {t.hood.useIndex}
                     </button>
                   </div>
                   <p className="mt-2 text-[10px] leading-snug text-text-muted">
                     {simIndex
-                      ? `With an index on likes_count, MySQL jumps straight to the matches — only ${passing} of ${total} rows are ever touched.`
-                      : `Without an index, MySQL has no shortcut — it opens and checks every single row, all ${total} of them, even the ${dropped} that end up failing.`}
+                      ? t.hood.withIndexDesc(passing, total)
+                      : t.hood.withoutIndexDesc(total, dropped)}
                   </p>
                 </div>
 
                 <p className="mt-2.5 mb-1 text-[9.5px] font-semibold tracking-wide text-text-muted uppercase">
-                  {simIndex ? "Rows actually touched:" : "Rows checked, one by one:"}
+                  {simIndex ? t.hood.rowsActuallyTouched : t.hood.rowsCheckedOneByOne}
                 </p>
                 <div className="flex flex-wrap gap-1">
                   {Array.from({ length: total }).map((_, i) => {
@@ -292,7 +291,11 @@ export function PipelineHoodPanel() {
             )}
           </AnimatePresence>
 
-          {stage < 1 && <p className="mt-1.5 text-[10.5px] text-text-muted">Not reached yet.</p>}
+          {stage < 1 && (
+            <p className="mt-1.5 text-[10.5px] text-text-muted">
+              {isUr ? "Abhi yahan tak nahi pohnche." : "Not reached yet."}
+            </p>
+          )}
         </NodeShell>
 
         <Connector flowing={stage >= 2} />
@@ -301,12 +304,20 @@ export function PipelineHoodPanel() {
         <NodeShell index={3} active={stage === 2} reached={stage >= 2} onClick={() => setStage(2)}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-mono text-[12.5px] font-bold">SELECT {selectColsText(selectedCols)}</span>
-            <Badge tone="neutral">{selectedCols.length + 1} of {ALL_COLUMNS.length} cols</Badge>
+            <Badge tone="neutral">
+              {isUr
+                ? `${selectedCols.length + 1} / ${ALL_COLUMNS.length} columns`
+                : `${selectedCols.length + 1} of ${ALL_COLUMNS.length} cols`}
+            </Badge>
           </div>
           <p className="mt-1.5 mb-2 text-[10.5px] text-text-muted">
             {stage >= 2
-              ? "Every column below was available — only the highlighted ones survive SELECT."
-              : "Not reached yet — every column below is still available."}
+              ? isUr
+                ? "Neeche har column available tha — sirf highlighted columns SELECT se bachte hain."
+                : "Every column below was available — only the highlighted ones survive SELECT."
+              : isUr
+                ? "Abhi yahan tak nahi pohnche — sab columns abhi available hain."
+                : "Not reached yet — every column below is still available."}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {ALL_COLUMNS.map((col) => {
@@ -361,7 +372,11 @@ export function PipelineHoodPanel() {
               </div>
             </div>
           ) : (
-            <p className="mt-1.5 text-[10.5px] text-text-muted">Not reached yet — rows are still in load order.</p>
+            <p className="mt-1.5 text-[10.5px] text-text-muted">
+              {isUr
+                ? "Abhi yahan tak nahi pohnche — rows abhi original load order mein hain."
+                : "Not reached yet — rows are still in load order."}
+            </p>
           )}
         </NodeShell>
 
@@ -378,8 +393,18 @@ export function PipelineHoodPanel() {
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-2.5 flex gap-2 overflow-hidden"
               >
-                <StatCard tone="ok" value={kept} label="returned" icon={<Check className="h-3.5 w-3.5" />} />
-                <StatCard tone="neutral" value={cut} label="cut off" icon={<X className="h-3.5 w-3.5" />} />
+                <StatCard
+                  tone="ok"
+                  value={kept}
+                  label={isUr ? "kept" : "returned"}
+                  icon={<Check className="h-3.5 w-3.5" />}
+                />
+                <StatCard
+                  tone="neutral"
+                  value={cut}
+                  label={isUr ? "cut off" : "cut off"}
+                  icon={<X className="h-3.5 w-3.5" />}
+                />
               </motion.div>
             )}
           </AnimatePresence>

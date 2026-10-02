@@ -6,6 +6,7 @@ import { useJoinStore } from "@/store/useJoinStore";
 import { useQueryStore } from "@/store/useQueryStore";
 import { useSetOpsStore } from "@/store/useSetOpsStore";
 import { useSubqueryStore } from "@/store/useSubqueryStore";
+import { useIndexStore } from "@/store/useIndexStore";
 
 // Explicit field lists per level — not a blind spread of getState() — so a
 // shared link carries only the tunable knobs, never stale/dead store fields.
@@ -17,6 +18,7 @@ const SHAREABLE_FIELDS: Record<LevelId, readonly string[]> = {
   join: ["stage", "joinType"],
   "set-ops": ["stage", "op"],
   subquery: ["stage", "op"],
+  index: ["stage", "mode", "indexStatus", "targetLikes", "writeLikes"],
 };
 
 const STORE_BY_LEVEL: Record<LevelId, { getState: () => object; setState: (s: object) => void }> = {
@@ -27,6 +29,7 @@ const STORE_BY_LEVEL: Record<LevelId, { getState: () => object; setState: (s: ob
   join: useJoinStore,
   "set-ops": useSetOpsStore,
   subquery: useSubqueryStore,
+  index: useIndexStore,
 };
 
 function pick(obj: Record<string, unknown>, keys: readonly string[]) {

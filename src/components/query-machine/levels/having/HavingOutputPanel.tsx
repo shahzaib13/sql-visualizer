@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useHavingStore } from "@/store/useHavingStore";
 import { BUCKET_COLORS } from "../shared/RowChip";
 import { SchemaCard, type SchemaColumn } from "@/components/query-machine/SchemaCard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 const POSTS_SCHEMA: SchemaColumn[] = [
   { name: "id", type: "int", pk: true },
@@ -20,6 +21,7 @@ const POSTS_SCHEMA: SchemaColumn[] = [
 ];
 
 export function HavingOutputPanel() {
+  const { t } = useTranslation();
   const stage = useHavingStore((s) => s.stage);
   const groupCol = useHavingStore((s) => s.groupCol);
   const metricCol = useHavingStore((s) => s.metricCol);
@@ -46,7 +48,7 @@ export function HavingOutputPanel() {
               view === v ? "bg-accent text-accent-ink" : "text-text-muted hover:text-text",
             )}
           >
-            {v}
+            {v === "input" ? t.output.inputTab : t.output.outputTab}
           </button>
         ))}
       </div>
@@ -157,7 +159,7 @@ export function HavingOutputPanel() {
           onClick={() => setStage(stage + 1)}
           className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2.5 font-mono text-[11.5px] font-bold text-accent-ink transition-transform hover:-translate-y-px active:scale-[0.98]"
         >
-          Advance to {HV_STAGES[stage + 1]}
+          {t.output.advanceTo} {HV_STAGES[stage + 1]}
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
       )}

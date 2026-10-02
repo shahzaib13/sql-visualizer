@@ -7,6 +7,8 @@ import { buildShareUrl } from "@/lib/shareLink";
 import { cn } from "@/lib/utils";
 import { LEVELS, useAppStore } from "@/store/useAppStore";
 import { useProgressStore } from "@/store/useProgressStore";
+import { LanguageToggle } from "./LanguageToggle";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 function JourneyMap() {
   const currentLevel = useAppStore((s) => s.currentLevel);
@@ -107,6 +109,7 @@ function ProgressDots() {
 }
 
 function ShareButton() {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleClick = async () => {
@@ -130,13 +133,14 @@ function ShareButton() {
     >
       <Link2 className="h-3.5 w-3.5" />
       <motion.span key={copied ? "copied" : "share"} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}>
-        {copied ? "Copied!" : "Share"}
+        {copied ? t.topbar.copied : t.topbar.share}
       </motion.span>
     </button>
   );
 }
 
 function TourButton() {
+  const { t } = useTranslation();
   const resetOnboarding = useProgressStore((s) => s.resetOnboarding);
 
   return (
@@ -147,29 +151,32 @@ function TourButton() {
       className="flex items-center gap-1.5 rounded-md border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] font-semibold text-text-muted transition-colors hover:border-accent hover:text-accent"
     >
       <Compass className="h-3.5 w-3.5 text-accent" />
-      <span>Tour</span>
+      <span>{t.topbar.tour}</span>
     </button>
   );
 }
 
 export function TopBar() {
+  const { t } = useTranslation();
+
   return (
-    <header className="flex flex-none flex-wrap items-center justify-between gap-4 border-b border-border bg-panel px-5 py-3">
+    <header className="flex flex-none flex-wrap items-center justify-between gap-3 border-b border-border bg-panel px-4 sm:px-5 py-2.5">
       <div className="flex items-center gap-2.5">
         <span className="grid h-7 w-7 flex-none place-items-center rounded-lg bg-gradient-to-br from-accent to-flow">
           <Cog className="h-4 w-4 text-white" strokeWidth={2.2} />
         </span>
         <div className="flex flex-col leading-tight">
-          <b className="text-[15px] font-bold tracking-tight">Query Machine</b>
-          <span className="text-[11.5px] text-text-muted">MySQL execution, level by level</span>
+          <b className="text-[15px] font-bold tracking-tight">{t.topbar.title}</b>
+          <span className="text-[11px] text-text-muted">{t.topbar.subtitle}</span>
         </div>
         <span className="ml-1 hidden sm:block">
           <ProgressDots />
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
         <JourneyMap />
+        <LanguageToggle />
         <TourButton />
         <ShareButton />
       </div>

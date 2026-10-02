@@ -19,6 +19,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useProgressStore } from "@/store/useProgressStore";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/useTranslation";
+import type { Locale } from "@/lib/i18n/translations";
 
 /* ------------------------------------------------------------------------- */
 /* 6 Custom Animated Illustrations (Kid-friendly, visual, dynamic)          */
@@ -348,86 +350,167 @@ interface StepDef {
   graphic: React.ReactNode;
 }
 
-const TOUR_STEPS: StepDef[] = [
-  {
-    targetId: "tour-command-panel",
-    beacon: "1. The Command Deck",
-    arrowEmoji: "👈",
-    directionHint: "LOOK AT THE HIGHLIGHTED LEFT PANEL",
-    badge: "1 of 6 · Left Panel",
-    title: "The Command Deck 🎮",
-    subtitle: "Your database control center",
-    desc: "Look at the glowing panel on your left! This entire deck is your remote control. Watch the SQL query at the top — it builds itself automatically as you adjust controls below.",
-    tip: "💡 Everything on this deck lets you control what the database does.",
-    graphic: <ControllerGraphic />,
-  },
-  {
-    targetId: "tour-controls-section",
-    beacon: "2. Interactive Controls",
-    arrowEmoji: "👈",
-    directionHint: "LOOK AT THE SLIDERS & BUTTONS",
-    badge: "2 of 6 · Tweaks & Filters",
-    title: "How To Tweak & Control 🎛️",
-    subtitle: "Sliders, column chips, and sort buttons",
-    desc: "Look at the sliders and buttons highlighted on your left! Drag the slider to change numbers (like likes > 400), click column chips to pick fields, and tap buttons to sort rows. No code typing required!",
-    tip: "💡 Try moving the slider on the left to see the numbers jump!",
-    graphic: <TweaksGraphic />,
-  },
-  {
-    targetId: "tour-hood-panel",
-    beacon: "3. The Magic Factory",
-    arrowEmoji: "👉",
-    directionHint: "LOOK AT THE HIGHLIGHTED MIDDLE PANEL",
-    badge: "3 of 6 · Middle Panel",
-    title: "Inside The Factory 🏭",
-    subtitle: "Watch MySQL think in real time!",
-    desc: "Look at the highlighted middle panel! This is the engine room. Watch rows travel like toys on a conveyor belt, get tested by your rules, and sort into neat buckets.",
-    tip: "💡 Click stages like WHERE or SELECT to see data flow!",
-    graphic: <FactoryGraphic />,
-  },
-  {
-    targetId: "tour-output-panel",
-    beacon: "4. The Results Chest",
-    arrowEmoji: "👉",
-    directionHint: "LOOK AT THE HIGHLIGHTED RIGHT PANEL",
-    badge: "4 of 6 · Right Panel",
-    title: "The Results Chest 🎁",
-    subtitle: "Inspect winners and raw data",
-    desc: "Look at the highlighted right panel! Here is your final answer. Switch to 'Output' to see the winners, or flip to 'Input' anytime to inspect all raw data before the query ran.",
-    tip: "💡 You can drag the panel borders to resize them anytime.",
-    graphic: <ChestGraphic />,
-  },
-  {
-    targetId: "tour-challenge-card",
-    beacon: "5. Puzzle Mission",
-    arrowEmoji: "👈",
-    directionHint: "LOOK AT THE CHALLENGE CARD ON THE LEFT",
-    badge: "5 of 6 · Challenge Mission",
-    title: "Puzzle Quests 🏆",
-    subtitle: "Test your skills with fun mini-games!",
-    desc: "Look at the mission card highlighted at the bottom of the left deck! Can you tweak the sliders so exactly 5 rows survive? Your answer is checked automatically live!",
-    tip: "💡 Solve the challenge to earn your victory checkmark!",
-    graphic: <MissionGraphic />,
-  },
-  {
-    targetId: "tour-journey-map",
-    beacon: "6. Level Journey",
-    arrowEmoji: "👆",
-    directionHint: "LOOK AT THE TOP BAR NAVIGATION",
-    badge: "6 of 6 · Top Navigation",
-    title: "Level Up Journey 🚀",
-    subtitle: "Climb through 7 visual stages!",
-    desc: "Look at the top bar! From basic Filtering and Aggregates to cool Joins and Subqueries — each level unlocks a new superpower and quiz checkmark!",
-    tip: "💡 Click 'Tour' in the top bar anytime to replay this guide.",
-    graphic: <RocketGraphic />,
-  },
-];
+function getTourSteps(locale: Locale): StepDef[] {
+  if (locale === "ur") {
+    return [
+      {
+        targetId: "tour-command-panel",
+        beacon: "1. The Command Deck",
+        arrowEmoji: "👈",
+        directionHint: "BAAYEIN (LEFT) PANEL KO DEKHEIN",
+        badge: "1 of 6 · Baayein Panel",
+        title: "The Command Deck 🎮",
+        subtitle: "Aapka Database Control Center",
+        desc: "Baayein taraf glowing panel ko dekhein! Yeh poora deck aapka remote control hai. Upar SQL query ko dekhein — neechay controls hilane se query khud bakhud live banti hai.",
+        tip: "💡 Is deck ki har cheez se aap database ko control kar saktay hain.",
+        graphic: <ControllerGraphic />,
+      },
+      {
+        targetId: "tour-controls-section",
+        beacon: "2. Interactive Controls",
+        arrowEmoji: "👈",
+        directionHint: "SLIDERS AUR BUTTONS KO DEKHEIN",
+        badge: "2 of 6 · Tweaks & Filters",
+        title: "Controls aur Tweaks Kaise Use Karein 🎛️",
+        subtitle: "Sliders, column chips, aur sort buttons",
+        desc: "Highlighted sliders aur buttons ko dekhein! Slider ko drag kar ke numbers badlein (jese likes > 400), chips par click kar ke columns chunein, aur sort badlein. Code type karne ki zaroorat nahi!",
+        tip: "💡 Baayein taraf slider ko hila kar dekhein — numbers live tabdeel honge!",
+        graphic: <TweaksGraphic />,
+      },
+      {
+        targetId: "tour-hood-panel",
+        beacon: "3. The Magic Factory",
+        arrowEmoji: "👉",
+        directionHint: "DARMIYAN (MIDDLE) PANEL KO DEKHEIN",
+        badge: "3 of 6 · Middle Panel",
+        title: "Inside The Factory 🏭",
+        subtitle: "MySQL ko real time sochte hue dekhein!",
+        desc: "Middle panel ko dekhein! Yeh database ka engine room hai. Rows conveyor belt par toys ki tarah travel karti hain, test hoti hain, aur buckets mein divide hoti hain.",
+        tip: "💡 WHERE ya SELECT par click karein aur data ka bahao dekhein!",
+        graphic: <FactoryGraphic />,
+      },
+      {
+        targetId: "tour-output-panel",
+        beacon: "4. The Results Chest",
+        arrowEmoji: "👉",
+        directionHint: "DAAYEIN (RIGHT) PANEL KO DEKHEIN",
+        badge: "4 of 6 · Right Panel",
+        title: "The Results Chest 🎁",
+        subtitle: "Final nateeja aur raw data dekhein",
+        desc: "Daayein (right) panel ko dekhein! Yahan query ka final answer hai. 'Output' par nateeja dekhein, ya 'Input' daba kar kisi bhi waqt raw data inspect karein.",
+        tip: "💡 Panel ke borders ko drag kar ke resize bhi kar saktay hain.",
+        graphic: <ChestGraphic />,
+      },
+      {
+        targetId: "tour-challenge-card",
+        beacon: "5. Puzzle Mission",
+        arrowEmoji: "👈",
+        directionHint: "BAAYEIN TARAF CHALLENGE CARD DEKHEIN",
+        badge: "5 of 6 · Challenge Mission",
+        title: "Puzzle Quests 🏆",
+        subtitle: "Mazaydar challenges solve karein!",
+        desc: "Left panel ke aakhir mein mission card dekhein! Kya aap sliders ko tweak kar saktay hain taake exactly 5 rows bachein? Aapka jawab live check hota hai!",
+        tip: "💡 Challenge solve kar ke victory checkmark hasil karein!",
+        graphic: <MissionGraphic />,
+      },
+      {
+        targetId: "tour-journey-map",
+        beacon: "6. Level Journey",
+        arrowEmoji: "👆",
+        directionHint: "UPAR TOP BAR NAVIGATION DEKHEIN",
+        badge: "6 of 6 · Top Navigation",
+        title: "Level Up Journey 🚀",
+        subtitle: "Tamam 7 visual stages paar karein!",
+        desc: "Top bar ko dekhein! Bunyadi Filtering se lekar Joins aur Subqueries tak — har level nayi superpower aur quiz unlock karta hai!",
+        tip: "💡 Kisi bhi waqt top bar mein 'Tour' daba kar is guide ko dobara dekh saktay hain.",
+        graphic: <RocketGraphic />,
+      },
+    ];
+  }
+
+  return [
+    {
+      targetId: "tour-command-panel",
+      beacon: "1. The Command Deck",
+      arrowEmoji: "👈",
+      directionHint: "LOOK AT THE HIGHLIGHTED LEFT PANEL",
+      badge: "1 of 6 · Left Panel",
+      title: "The Command Deck 🎮",
+      subtitle: "Your database control center",
+      desc: "Look at the glowing panel on your left! This entire deck is your remote control. Watch the SQL query at the top — it builds itself automatically as you adjust controls below.",
+      tip: "💡 Everything on this deck lets you control what the database does.",
+      graphic: <ControllerGraphic />,
+    },
+    {
+      targetId: "tour-controls-section",
+      beacon: "2. Interactive Controls",
+      arrowEmoji: "👈",
+      directionHint: "LOOK AT THE SLIDERS & BUTTONS",
+      badge: "2 of 6 · Tweaks & Filters",
+      title: "How To Tweak & Control 🎛️",
+      subtitle: "Sliders, column chips, and sort buttons",
+      desc: "Look at the sliders and buttons highlighted on your left! Drag the slider to change numbers (like likes > 400), click column chips to pick fields, and tap buttons to sort rows. No code typing required!",
+      tip: "💡 Try moving the slider on the left to see the numbers jump!",
+      graphic: <TweaksGraphic />,
+    },
+    {
+      targetId: "tour-hood-panel",
+      beacon: "3. The Magic Factory",
+      arrowEmoji: "👉",
+      directionHint: "LOOK AT THE HIGHLIGHTED MIDDLE PANEL",
+      badge: "3 of 6 · Middle Panel",
+      title: "Inside The Factory 🏭",
+      subtitle: "Watch MySQL think in real time!",
+      desc: "Look at the highlighted middle panel! This is the engine room. Watch rows travel like toys on a conveyor belt, get tested by your rules, and sort into neat buckets.",
+      tip: "💡 Click stages like WHERE or SELECT to see data flow!",
+      graphic: <FactoryGraphic />,
+    },
+    {
+      targetId: "tour-output-panel",
+      beacon: "4. The Results Chest",
+      arrowEmoji: "👉",
+      directionHint: "LOOK AT THE HIGHLIGHTED RIGHT PANEL",
+      badge: "4 of 6 · Right Panel",
+      title: "The Results Chest 🎁",
+      subtitle: "Inspect winners and raw data",
+      desc: "Look at the highlighted right panel! Here is your final answer. Switch to 'Output' to see the winners, or flip to 'Input' anytime to inspect all raw data before the query ran.",
+      tip: "💡 You can drag the panel borders to resize them anytime.",
+      graphic: <ChestGraphic />,
+    },
+    {
+      targetId: "tour-challenge-card",
+      beacon: "5. Puzzle Mission",
+      arrowEmoji: "👈",
+      directionHint: "LOOK AT THE CHALLENGE CARD ON THE LEFT",
+      badge: "5 of 6 · Challenge Mission",
+      title: "Puzzle Quests 🏆",
+      subtitle: "Test your skills with fun mini-games!",
+      desc: "Look at the mission card highlighted at the bottom of the left deck! Can you tweak the sliders so exactly 5 rows survive? Your answer is checked automatically live!",
+      tip: "💡 Solve the challenge to earn your victory checkmark!",
+      graphic: <MissionGraphic />,
+    },
+    {
+      targetId: "tour-journey-map",
+      beacon: "6. Level Journey",
+      arrowEmoji: "👆",
+      directionHint: "LOOK AT THE TOP BAR NAVIGATION",
+      badge: "6 of 6 · Top Navigation",
+      title: "Level Up Journey 🚀",
+      subtitle: "Climb through 7 visual stages!",
+      desc: "Look at the top bar! From basic Filtering and Aggregates to cool Joins and Subqueries — each level unlocks a new superpower and quiz checkmark!",
+      tip: "💡 Click 'Tour' in the top bar anytime to replay this guide.",
+      graphic: <RocketGraphic />,
+    },
+  ];
+}
 
 /* ------------------------------------------------------------------------- */
 /* Main Onboarding Tour Component                                            */
 /* ------------------------------------------------------------------------- */
 
 export function OnboardingTour() {
+  const { locale } = useTranslation();
+  const tourSteps = getTourSteps(locale);
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [targetRect, setTargetRect] = useState<{
@@ -444,8 +527,8 @@ export function OnboardingTour() {
     setMounted(true);
   }, []);
 
-  const current = TOUR_STEPS[step];
-  const isLast = step === TOUR_STEPS.length - 1;
+  const current = tourSteps[step];
+  const isLast = step === tourSteps.length - 1;
 
   // Track target element bounding rect & autoscroll smoothly to it
   useEffect(() => {
@@ -498,7 +581,7 @@ export function OnboardingTour() {
         dismissOnboarding();
       } else if (e.key === "ArrowRight") {
         if (isLast) dismissOnboarding();
-        else setStep((s) => Math.min(s + 1, TOUR_STEPS.length - 1));
+        else setStep((s) => Math.min(s + 1, tourSteps.length - 1));
       } else if (e.key === "ArrowLeft") {
         setStep((s) => Math.max(0, s - 1));
       }
@@ -523,15 +606,19 @@ export function OnboardingTour() {
   };
 
   /* ------------------------------------------------------------------------- */
-  /* Smart Card Placement Calculation                                          */
+  /* Smart Card Placement Calculation (Strictly Clamped Within Viewport)       */
   /* ------------------------------------------------------------------------- */
   const computeCardStyle = (): React.CSSProperties => {
     if (typeof window === "undefined" || window.innerWidth < 768) {
-      return { position: "fixed", bottom: 12, left: 12, right: 12 };
+      return { position: "fixed", bottom: 12, left: 12, right: 12, maxHeight: "calc(100vh - 24px)" };
     }
 
-    const cardWidth = 390;
-    const padding = 20;
+    const cardWidth = 380;
+    const padding = 16;
+    const vh = window.innerHeight;
+    const minTop = 64; // Below the top bar
+    const estimatedHeight = 440; // Approximate modal card height
+    const maxTop = Math.max(minTop, vh - estimatedHeight - 24); // Guarantees bottom is above taskbar
 
     if (!targetRect) {
       return {
@@ -539,6 +626,7 @@ export function OnboardingTour() {
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
@@ -553,8 +641,9 @@ export function OnboardingTour() {
       );
       return {
         position: "fixed",
-        top: targetRect.top + targetRect.height + 16,
+        top: Math.min(targetRect.top + targetRect.height + 12, maxTop),
         left: leftPos,
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
@@ -562,17 +651,20 @@ export function OnboardingTour() {
     if (current.targetId === "tour-command-panel") {
       return {
         position: "fixed",
-        top: 75,
+        top: Math.max(minTop, Math.min(75, maxTop)),
         left: Math.min(targetRect.left + targetRect.width + 24, window.innerWidth - cardWidth - padding),
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
-    // Step 2: Controls Section -> Place card to the right of controls
+    // Step 2: Controls Section -> Clamp top safely so it never drops behind Windows taskbar!
     if (current.targetId === "tour-controls-section") {
+      const idealTop = targetRect.top - 30;
       return {
         position: "fixed",
-        top: Math.max(75, targetRect.top - 20),
+        top: Math.max(minTop, Math.min(idealTop, maxTop)),
         left: Math.min(targetRect.left + targetRect.width + 24, window.innerWidth - cardWidth - padding),
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
@@ -580,8 +672,9 @@ export function OnboardingTour() {
     if (current.targetId === "tour-output-panel") {
       return {
         position: "fixed",
-        top: 75,
+        top: Math.max(minTop, Math.min(75, maxTop)),
         left: Math.max(padding, targetRect.left - cardWidth - 24),
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
@@ -589,24 +682,27 @@ export function OnboardingTour() {
     if (current.targetId === "tour-hood-panel") {
       return {
         position: "fixed",
-        top: 75,
+        top: Math.max(minTop, Math.min(75, maxTop)),
         left: padding + 16,
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
-    // Step 5: Challenge Card -> Place card to the right, near bottom
+    // Step 5: Challenge Card -> Place card safely clamped above taskbar
     if (current.targetId === "tour-challenge-card") {
       return {
         position: "fixed",
-        bottom: 30,
+        top: maxTop,
         left: Math.min(targetRect.left + targetRect.width + 24, window.innerWidth - cardWidth - padding),
+        maxHeight: "calc(100vh - 40px)",
       };
     }
 
     return {
       position: "fixed",
-      top: 90,
+      top: Math.max(minTop, Math.min(80, maxTop)),
       left: Math.min(targetRect.left + targetRect.width + 20, window.innerWidth - cardWidth - padding),
+      maxHeight: "calc(100vh - 40px)",
     };
   };
 
@@ -691,7 +787,7 @@ export function OnboardingTour() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 8 }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
-            className="w-full max-w-[390px] rounded-2xl border-2 border-accent/40 bg-panel p-4 sm:p-5 shadow-2xl backdrop-blur-md"
+            className="w-full max-w-[380px] max-h-[calc(100vh-48px)] flex flex-col overflow-y-auto rounded-2xl border-2 border-accent/40 bg-panel p-3.5 sm:p-4 shadow-2xl backdrop-blur-md scrollbar-thin"
           >
             {/* Top Directional Pointer Pill (Guides user's gaze immediately!) */}
             <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-border pb-2.5">
@@ -706,7 +802,7 @@ export function OnboardingTour() {
                   onClick={dismissOnboarding}
                   className="rounded-md px-2 py-0.5 text-[10.5px] font-semibold text-text-muted hover:bg-panel-2 hover:text-text transition-colors"
                 >
-                  Skip
+                  {locale === "ur" ? "Skip Karein" : "Skip"}
                 </button>
                 <button
                   type="button"
@@ -731,7 +827,7 @@ export function OnboardingTour() {
               </div>
 
               <span className="font-mono text-[10px] text-text-muted">
-                Step {step + 1} / {TOUR_STEPS.length}
+                {locale === "ur" ? `Marhala ${step + 1} / ${tourSteps.length}` : `Step ${step + 1} / ${tourSteps.length}`}
               </span>
             </div>
 
@@ -762,7 +858,7 @@ export function OnboardingTour() {
             <div className="mt-3.5 flex items-center justify-between border-t border-border pt-3">
               {/* Step indicator dots */}
               <div className="flex gap-1.5 items-center">
-                {TOUR_STEPS.map((_, i) => (
+                {tourSteps.map((_, i) => (
                   <button
                     key={i}
                     type="button"
@@ -786,7 +882,7 @@ export function OnboardingTour() {
                     className="flex items-center gap-1 rounded-lg border border-border bg-panel-2 px-2.5 py-1.5 font-mono text-[11px] font-bold text-text-muted hover:text-text transition-colors"
                   >
                     <ArrowLeft className="h-3 w-3" />
-                    Back
+                    {locale === "ur" ? "Peechay" : "Back"}
                   </button>
                 )}
 
@@ -798,11 +894,11 @@ export function OnboardingTour() {
                   {isLast ? (
                     <>
                       <Sparkles className="h-3.5 w-3.5" />
-                      Start Exploring!
+                      {locale === "ur" ? "Shuru Karein! 🚀" : "Start Exploring! 🚀"}
                     </>
                   ) : (
                     <>
-                      Next
+                      {locale === "ur" ? "Agla" : "Next"}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}

@@ -12,6 +12,8 @@ import { JoinView } from "./levels/JoinView";
 import { Level0View } from "./levels/Level0View";
 import { SetOpsView } from "./levels/SetOpsView";
 import { SubqueryView } from "./levels/SubqueryView";
+import { IndexView } from "./levels/IndexView";
+import { MobileNotice } from "./MobileNotice";
 import { OnboardingTour } from "./OnboardingTour";
 import { TopBar } from "./TopBar";
 
@@ -31,6 +33,7 @@ export function QueryMachine() {
     <Tooltip.Provider delayDuration={150}>
       <div className="flex h-dvh flex-col overflow-hidden bg-bg text-text">
         <TopBar />
+        <MobileNotice />
         <OnboardingTour />
         <div className="min-h-0 flex-1">
           {currentLevel === "filter" && <Level0View />}
@@ -40,6 +43,7 @@ export function QueryMachine() {
           {currentLevel === "join" && <JoinView />}
           {currentLevel === "set-ops" && <SetOpsView />}
           {currentLevel === "subquery" && <SubqueryView />}
+          {currentLevel === "index" && <IndexView />}
         </div>
       </div>
     </Tooltip.Provider>

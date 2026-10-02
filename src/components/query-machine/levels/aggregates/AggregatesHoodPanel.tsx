@@ -22,8 +22,11 @@ import {
 import { POSTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useAggregatesStore } from "@/store/useAggregatesStore";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function AggregatesHoodPanel() {
+  const { locale } = useTranslation();
+  const isUr = locale === "ur";
   const stage = useAggregatesStore((s) => s.stage);
   const func = useAggregatesStore((s) => s.func);
   const numericCol = useAggregatesStore((s) => s.numericCol);
@@ -117,10 +120,20 @@ export function AggregatesHoodPanel() {
                 <Database className="h-5 w-5 text-flow flex-none" />
                 <div>
                   <h3 className="font-mono text-[13px] font-bold text-text">
-                    Stage 1: FROM posts — Table Loaded into Working Memory
+                    {isUr
+                      ? "Marhala 1: FROM posts — Table Working Memory mein Load Ho Gayi"
+                      : "Stage 1: FROM posts — Table Loaded into Working Memory"}
                   </h3>
                   <p className="mt-0.5 text-[11.5px] text-text-muted">
-                    Database loads all <b className="text-text">20 raw rows</b> into buffer memory. Use the <b className="text-text">Execution Timeline slider</b> in the left panel to run the calculation.
+                    {isUr ? (
+                      <>
+                        Database tamam <b className="text-text">20 raw rows</b> ko buffer memory mein load karta hai. Calculation chalane ke liye left panel mein <b className="text-text">Execution Timeline slider</b> use karein.
+                      </>
+                    ) : (
+                      <>
+                        Database loads all <b className="text-text">20 raw rows</b> into buffer memory. Use the <b className="text-text">Execution Timeline slider</b> in the left panel to run the calculation.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -129,9 +142,11 @@ export function AggregatesHoodPanel() {
             {/* Raw Table Buffer */}
             <div className="rounded-xl border border-border bg-panel p-3.5 shadow-[var(--shadow-row)]">
               <div className="flex items-center justify-between border-b border-border pb-2.5 font-mono text-[11px] text-text-muted">
-                <span>Working Buffer (20 raw rows in memory)</span>
+                <span>{isUr ? "Working Buffer (Memory mein 20 rows)" : "Working Buffer (20 raw rows in memory)"}</span>
                 <span className="text-accent font-semibold">
-                  Target column for {func}: {func === "DISTINCT" ? distinctCol : numericCol}
+                  {isUr
+                    ? `${func} ke liye target column: ${func === "DISTINCT" ? distinctCol : numericCol}`
+                    : `Target column for ${func}: ${func === "DISTINCT" ? distinctCol : numericCol}`}
                 </span>
               </div>
 
@@ -197,7 +212,9 @@ export function AggregatesHoodPanel() {
                       <span>Unique &apos;{distinctCol}&apos; Pool ({distinctData.uniqueValues.length})</span>
                     </div>
                     <span className="font-mono text-[11px] font-semibold text-text-muted">
-                      {POSTS.length - distinctData.uniqueValues.length} duplicate rows discarded
+                      {isUr
+                        ? `${POSTS.length - distinctData.uniqueValues.length} duplicate rows nikaal di gayin`
+                        : `${POSTS.length - distinctData.uniqueValues.length} duplicate rows discarded`}
                     </span>
                   </div>
 
@@ -225,7 +242,7 @@ export function AggregatesHoodPanel() {
                 <div className="rounded-xl border border-border bg-panel p-3.5 shadow-[var(--shadow-row)]">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2.5">
                     <span className="font-mono text-[11px] font-bold text-text-muted uppercase">
-                      Live Sieve Stream
+                      {isUr ? "Live Sieve (Chhanni) Stream" : "Live Sieve Stream"}
                     </span>
                     <div className="flex items-center gap-1">
                       {(["all", "unique", "duplicates"] as const).map((mode) => (
@@ -274,11 +291,11 @@ export function AggregatesHoodPanel() {
                         <div className="flex-none">
                           {item.isDuplicate ? (
                             <span className="flex items-center gap-1 rounded bg-bad/10 border border-bad/30 px-2 py-0.5 font-mono text-[10px] font-bold text-bad">
-                              ✕ Duplicate of #{item.firstSeenPostId} (Skipped)
+                              ✕ {isUr ? `Duplicate #${item.firstSeenPostId} (Skipped)` : `Duplicate of #${item.firstSeenPostId} (Skipped)`}
                             </span>
                           ) : (
                             <span className="flex items-center gap-1 rounded bg-ok/10 border border-ok/40 px-2 py-0.5 font-mono text-[10px] font-extrabold text-ok">
-                              <Check className="h-3 w-3" strokeWidth={3} /> 1st Seen (Saved)
+                              <Check className="h-3 w-3" strokeWidth={3} /> {isUr ? "Pehli dafa (Saved)" : "1st Seen (Saved)"}
                             </span>
                           )}
                         </div>
@@ -294,13 +311,15 @@ export function AggregatesHoodPanel() {
               <div className="flex flex-col gap-3.5">
                 <div className="rounded-xl border border-border bg-panel p-4 shadow-[var(--shadow-row)] text-center">
                   <div className="font-mono text-[11px] uppercase text-text-muted font-bold tracking-wider">
-                    Total Count Tally
+                    {isUr ? "Kul Ginti Tally" : "Total Count Tally"}
                   </div>
                   <div className="font-mono text-[36px] font-black text-accent tracking-tight mt-1">
                     {countMode === "DISTINCT format" ? "2 Unique Formats" : `${POSTS.length} Rows`}
                   </div>
                   <div className="text-[11.5px] text-text-muted font-medium mt-1">
-                    COUNT steps through table rows one-by-one to tally total matched rows.
+                    {isUr
+                      ? "COUNT table ke har row ko aik aik kar ke ginta hai taake kul matching rows ka pata chale."
+                      : "COUNT steps through table rows one-by-one to tally total matched rows."}
                   </div>
                 </div>
 
@@ -564,12 +583,18 @@ export function AggregatesHoodPanel() {
                 <CheckCircle2 className="h-6 w-6 text-ok flex-none" />
                 <div>
                   <h3 className="font-mono text-[14px] font-bold text-ok">
-                    Stage 3: SELECT RESULT — Query Complete!
+                    {isUr
+                      ? "Marhala 3: SELECT RESULT — Query Mukammal!"
+                      : "Stage 3: SELECT RESULT — Query Complete!"}
                   </h3>
                   <p className="mt-0.5 text-[11.5px] text-text-muted">
                     {func === "DISTINCT"
-                      ? "MySQL has finished deduplicating the table and emits the unique result set."
-                      : "MySQL has condensed all 20 source rows into exactly 1 scalar summary row."}
+                      ? isUr
+                        ? "MySQL table se duplicates hata chuka hai aur unique result set emit kar raha hai."
+                        : "MySQL has finished deduplicating the table and emits the unique result set."
+                      : isUr
+                        ? "MySQL ne tamam 20 source rows ko compress kar ke sirf 1 scalar summary row bana diya hai."
+                        : "MySQL has condensed all 20 source rows into exactly 1 scalar summary row."}
                   </p>
                 </div>
               </div>
@@ -580,10 +605,10 @@ export function AggregatesHoodPanel() {
               <div className="rounded-xl border border-border bg-panel p-5 shadow-[var(--shadow-row)]">
                 <div className="flex items-center justify-between border-b border-border pb-3">
                   <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-text-muted">
-                    Final Output: DISTINCT {distinctCol}
+                    {isUr ? `Final Output: DISTINCT ${distinctCol}` : `Final Output: DISTINCT ${distinctCol}`}
                   </span>
                   <span className="rounded-full bg-accent/15 px-3 py-1 font-mono text-[11px] font-bold text-accent">
-                    {distinctData.uniqueValues.length} rows returned
+                    {distinctData.uniqueValues.length} {isUr ? "rows wapis aayin" : "rows returned"}
                   </span>
                 </div>
 
@@ -602,7 +627,7 @@ export function AggregatesHoodPanel() {
                         </span>
                       </div>
                       <span className="font-mono text-[12px] text-text-muted font-medium">
-                        Matched in <b className="text-text">{u.count}</b> rows
+                        {isUr ? "Mila" : "Matched in"} <b className="text-text">{u.count}</b> rows
                       </span>
                     </div>
                   ))}
@@ -612,7 +637,7 @@ export function AggregatesHoodPanel() {
               /* Grand 1x1 Scalar Output Matrix */
               <div className="rounded-xl border border-border bg-panel p-6 shadow-[var(--shadow-row)] text-center">
                 <div className="font-mono text-[11px] font-bold tracking-wider text-text-muted uppercase">
-                  1x1 Scalar Result Emitted by SELECT
+                  {isUr ? "SELECT se Nikla Hua 1x1 Scalar Nateeja" : "1x1 Scalar Result Emitted by SELECT"}
                 </div>
 
                 <div className="mt-4 flex flex-col items-center justify-center">
@@ -625,7 +650,16 @@ export function AggregatesHoodPanel() {
                 </div>
 
                 <div className="mt-6 rounded-lg border border-border bg-panel-2 p-3.5 text-[12px] text-text-muted text-left leading-relaxed">
-                  💡 <b>Why exactly 1 row?</b> In SQL, when you apply an aggregate function like <code className="font-mono font-bold text-accent">{func}()</code> without a <code className="font-mono text-text">{func === "COUNT" ? "" : "GROUP BY"}</code> clause, the database treats the entire table as one single group and summarizes it into a single scalar value.
+                  💡 <b>{isUr ? "Sirf 1 row kyun?" : "Why exactly 1 row?"}</b>{" "}
+                  {isUr ? (
+                    <>
+                      SQL mein jab aap GROUP BY ke baghair koi aggregate function (jaise <code className="font-mono font-bold text-accent">{func}()</code>) chalate hain, to database poori table ko aik akela group samajhta hai aur sirf aik scalar value summarize kar ke deta hai.
+                    </>
+                  ) : (
+                    <>
+                      In SQL, when you apply an aggregate function like <code className="font-mono font-bold text-accent">{func}()</code> without a <code className="font-mono text-text">{func === "COUNT" ? "" : "GROUP BY"}</code> clause, the database treats the entire table as one single group and summarizes it into a single scalar value.
+                    </>
+                  )}
                 </div>
               </div>
             )}

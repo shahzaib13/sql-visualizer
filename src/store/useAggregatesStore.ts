@@ -20,19 +20,19 @@ interface AggregatesState {
 }
 
 export const useAggregatesStore = create<AggregatesState>((set) => ({
-  stage: 0,
+  stage: 1, // Default to SCAN & COMPUTE so math stream and accumulator are live
   func: "SUM",
   numericCol: "likes_count",
   distinctCol: "format",
   countMode: "*",
   setStage: (stage) => set({ stage }),
-  setFunc: (func) => set({ func, stage: 0 }),
-  setNumericCol: (numericCol) => set({ numericCol, stage: 0 }),
-  setDistinctCol: (distinctCol) => set({ distinctCol, stage: 0 }),
-  setCountMode: (countMode) => set({ countMode, stage: 0 }),
+  setFunc: (func) => set({ func, stage: 1 }),
+  setNumericCol: (numericCol) => set({ numericCol, stage: 1 }),
+  setDistinctCol: (distinctCol) => set({ distinctCol, stage: 1 }),
+  setCountMode: (countMode) => set({ countMode, stage: 1 }),
   reset: () =>
     set({
-      stage: 0,
+      stage: 1,
       func: "SUM",
       numericCol: "likes_count",
       distinctCol: "format",

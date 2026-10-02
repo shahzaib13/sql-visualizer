@@ -271,14 +271,7 @@ function HavingCard() {
 export function HavingCommandPanel() {
   return (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
-      <TheoryCard
-        goal="Think of a librarian inspecting the filled genre bins: only bins holding at least 3 books are kept for the display cart, while sparse bins get wheeled away. HAVING runs strictly after GROUP BY — WHERE inspects individual index cards before binning, but HAVING inspects the summarized bins after tallying."
-        keywords={[
-          { term: "GROUP BY", note: GLOSSARY["GROUP BY"] },
-          { term: "HAVING", note: GLOSSARY.HAVING },
-          { term: "COUNT(*)", note: GLOSSARY["COUNT(*)"] },
-        ]}
-      />
+      <TheoryCard level="having" />
       <SqlBlock />
       <ExecutionTimeline />
       <div id="tour-controls-section" className="mt-5 flex flex-col gap-3">
